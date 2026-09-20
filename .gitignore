@@ -1,0 +1,38 @@
+# Dependencies & build
+node_modules/
+dist/
+build/
+.cache/
+.vite/
+vite.config.*.timestamp-*
+*.tsbuildinfo
+
+# Environment & secrets — never commit real keys
+.env
+.env.*
+!.env.example
+.env.local
+.env.*.local
+*.pem
+*.key
+credentials.json
+serviceAccount*.json
+
+# Logs
+*-debug.log*
+logs/
+*.log
+.claude-replay.*
+.tmp-*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Figma Make / agent platform local state
+/.figma/design-context/
+/.plugins/
+/.opencode-skills/
