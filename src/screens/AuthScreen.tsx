@@ -2,7 +2,7 @@ import { Logo, MoonIcon } from '../components/icons'
 import { Button, Checkbox, Field } from '../components/ui'
 import { photo } from '../lib/media'
 import { useState } from 'react'
-import { ADMIN_CREDENTIALS, useAuth } from '../lib/auth'
+import { useAuth } from '../lib/auth'
 
 type Mode = 'login' | 'signup'
 
@@ -35,8 +35,8 @@ export default function AuthScreen({
   const c = copy[mode]
   const { signIn, signUp } = useAuth()
   const [name, setName] = useState('')
-  const [email, setEmail] = useState(ADMIN_CREDENTIALS.email)
-  const [password, setPassword] = useState(ADMIN_CREDENTIALS.password)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -162,12 +162,6 @@ export default function AuthScreen({
                 {busy ? 'Aguarde…' : c.cta}
               </Button>
             </form>
-
-            {mode === 'login' && (
-              <p className="mt-3 text-center text-[12px] text-neutral-400">
-                Admin: {ADMIN_CREDENTIALS.email}
-              </p>
-            )}
 
             <p className="mt-6 text-center text-[15px] text-neutral-500">
               {c.switchText}{' '}

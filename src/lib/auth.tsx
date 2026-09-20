@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
-import { ADMIN_CREDENTIALS, DEMO_CREDENTIALS, supabase } from './supabase'
+import { supabase } from './supabase'
 import { fetchCurrentUserProfile } from './api'
 
 type Profile = {
@@ -125,5 +125,3 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
   return ctx
 }
-
-export { ADMIN_CREDENTIALS, DEMO_CREDENTIALS }

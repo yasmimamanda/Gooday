@@ -17,12 +17,3 @@ export const supabase = createClient(url ?? '', anonKey ?? '', {
   },
 })
 
-export const DEMO_CREDENTIALS = {
-  email: 'yasmandago@gmail.com',
-  /** Nunca versionar senha — preencha só no .env local / login manual */
-  password: '',
-} as const
-
-/** Conta admin — role=admin no app_metadata do Supabase Auth */
-export const ADMIN_CREDENTIALS = DEMO_CREDENTIALS
-
