@@ -3,6 +3,7 @@ import { contacts as mockContacts, chatHistory, type ChatMessage, type Contact }
 import { fetchChatMessages, fetchContacts } from '../lib/api'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
+import { MediaImg } from '../components/ui'
 
 export default function Chat({
   contactId,
@@ -109,7 +110,7 @@ export default function Chat({
             </p>
           </div>
           <div className="relative h-10 w-10 overflow-hidden rounded-full">
-            <img src={contact.avatar} alt="" className="h-full w-full object-cover" />
+            <MediaImg src={contact.avatar} alt="" className="h-full w-full object-cover" />
           </div>
         </div>
       </header>

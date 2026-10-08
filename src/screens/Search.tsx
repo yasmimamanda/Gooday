@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Search as SearchIcon, X, Users } from 'lucide-react'
+import { MediaImg } from '../components/ui'
 
 const searchPeople = [
   { id: 'bruna', name: 'Bruna Carla', handle: '@bruna_carla', avatar: '/assets/eec11.png', interests: 3 },
@@ -170,7 +171,7 @@ export default function Search({
                   className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-neutral-50 active:bg-neutral-100 border-b border-neutral-200 last:border-b-0"
                 >
                   <div className="h-[52px] w-[52px] shrink-0 overflow-hidden rounded-full">
-                    <img src={person.avatar} alt="" className="h-full w-full object-cover" />
+                    <MediaImg src={person.avatar} alt="" className="h-full w-full object-cover" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[15px] font-semibold text-ink">{person.name}</p>
@@ -201,7 +202,7 @@ export default function Search({
                   className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-neutral-50 active:bg-neutral-100 border-b border-neutral-200 last:border-b-0"
                 >
                   <div className="h-[52px] w-[52px] shrink-0 overflow-hidden rounded-[14px]">
-                    <img src={group.cover} alt="" className="h-full w-full object-cover" />
+                    <MediaImg src={group.cover} alt="" className="h-full w-full object-cover" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[15px] font-semibold text-ink">{group.name}</p>

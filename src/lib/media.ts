@@ -38,13 +38,20 @@ export const photo = {
   // Unsplash extras for story carousel
   wellnessWoman: 'https://images.unsplash.com/photo-1518708909080-704599b19972?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
   stretchWoman: 'https://images.unsplash.com/photo-1567013514336-6de53c9e7e63?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
-  runnerWoman: 'https://images.unsplash.com/photo-1480179087180-d9f0ec044897?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
+  runnerWoman: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
   mealPrep: 'https://images.unsplash.com/photo-1543352632-5a4b24e4d2a6?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
   yogaMeditation: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
-  mountainSit: 'https://images.unsplash.com/photo-1522075782449-e45a34f1ddfb?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
-  sprintTrack: 'https://images.unsplash.com/photo-1744060204728-f68e434a3edf?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
-  pinkTank: 'https://images.unsplash.com/photo-1759476530066-94bee6a30c40?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
-  orangeSlice: 'https://images.unsplash.com/photo-1606858374191-c18040e98ad7?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
+  mountainSit: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
+  sprintTrack: 'https://images.unsplash.com/photo-1483721310020-03333e27aaa5?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
+  pinkTank: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
+  orangeSlice: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
+}
+
+export const IMAGE_FALLBACK = faces.marcos
+
+export function displayHandle(handle?: string | null) {
+  if (!handle) return '@marcos_v'
+  return handle.startsWith('@') ? handle : `@${handle}`
 }
 
 export const currentUser = {

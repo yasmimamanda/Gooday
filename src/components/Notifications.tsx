@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import { fetchNotifications, type AppNotification } from '../lib/api'
 import { supabase } from '../lib/supabase'
+import { MediaImg } from './ui'
 
 type Notif = AppNotification
 
@@ -74,7 +75,7 @@ export default function Notifications({ onClose }: { onClose: () => void }) {
             style={{ background: n.read ? 'transparent' : 'rgba(212,245,53,0.14)' }}
           >
             <div className="h-[52px] w-[52px] shrink-0 overflow-hidden rounded-full">
-              <img src={n.avatar} alt="" className="h-full w-full object-cover" />
+              <MediaImg src={n.avatar} alt="" className="h-full w-full object-cover" />
             </div>
 
             <div className="min-w-0 flex-1">

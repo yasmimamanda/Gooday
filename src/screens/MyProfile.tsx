@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronLeft, Settings, Grid3x3, Heart, MessageSquare, Camera, Edit3 } from 'lucide-react'
-import { currentUser as mockUser } from '../lib/media'
+import { currentUser as mockUser, displayHandle } from '../lib/media'
+import { MediaImg } from '../components/ui'
 import { useAuth } from '../lib/auth'
 
 type Tab = 'posts' | 'curtidas'
@@ -15,10 +16,10 @@ export default function MyProfile({
   const { profile } = useAuth()
   const myData = {
     name: profile?.name ?? 'Marcos Vinícius',
-    handle: profile?.handle ?? '@marcos_v',
+    handle: displayHandle(profile?.handle ?? '@marcos_v'),
     avatar: profile?.avatar || mockUser.avatar,
     cover: profile?.cover || 'https://images.unsplash.com/photo-1530143311094-34d807799e8f?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900&h=400',
-    location: 'São Paulo, SP',
+    location: profile?.location || 'São Paulo, SP',
     bio: profile?.bio || 'Corredor amador e entusiasta de vida saudável. Acredito que movimento é remédio. 🏃‍♂️',
     interests: ['Corrida', 'Nutrição', 'Hiking', 'Ciclismo'],
     followers: 1240,
@@ -64,7 +65,7 @@ export default function MyProfile({
 
         {/* Cover */}
         <div className="relative h-[160px] w-full overflow-hidden rounded-[18px]">
-          <img src={myData.cover} alt="" className="h-full w-full object-cover" />
+          <MediaImg src={myData.cover} alt="" className="h-full w-full object-cover" />
           <button
             aria-label="Alterar capa"
             className="absolute right-3 bottom-3 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-[12px] font-medium text-white backdrop-blur-sm transition-colors hover:bg-black/70"
@@ -78,7 +79,7 @@ export default function MyProfile({
         <div className="-mt-10 ml-4 mb-4 flex items-end justify-between">
           <div className="relative">
             <div className="h-[88px] w-[88px] overflow-hidden rounded-full ring-[3px] ring-canvas">
-              <img src={myData.avatar} alt={myData.name} className="h-full w-full object-cover" />
+              <MediaImg src={myData.avatar} alt={myData.name} className="h-full w-full object-cover" />
             </div>
             <button
               aria-label="Alterar foto"
@@ -208,7 +209,7 @@ export default function MyProfile({
             <div className="mt-3 grid grid-cols-3 gap-1 overflow-hidden rounded-[14px]">
               {myData.posts.map((src, i) => (
                 <div key={i} className="aspect-square overflow-hidden">
-                  <img src={src} alt="" className="h-full w-full object-cover transition-transform hover:scale-105" />
+                  <MediaImg src={src} alt="" className="h-full w-full object-cover transition-transform hover:scale-105" />
                 </div>
               ))}
             </div>

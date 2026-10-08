@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { ChevronLeft, Search as SearchIcon, X, Share2, Lock, Globe, Users, Plus } from 'lucide-react'
+import { MediaImg } from '../components/ui'
 
 type Status = 'Público' | 'Privado' | 'Participando'
 
@@ -206,7 +207,7 @@ export default function Grupos({
               >
                 {/* Cover */}
                 <div className="relative overflow-hidden" style={{ height: 130 }}>
-                  <img
+                  <MediaImg
                     src={grupo.cover}
                     alt=""
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
@@ -237,7 +238,7 @@ export default function Grupos({
                   {/* Member avatars bottom-left */}
                   <div className="absolute bottom-2.5 left-3 flex items-center">
                     {grupo.memberAvatars.slice(0, 3).map((src, i) => (
-                      <img
+                      <MediaImg
                         key={i}
                         src={src}
                         alt=""

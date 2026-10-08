@@ -7,7 +7,7 @@ import {
 } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from './supabase'
-import { fetchCurrentUserProfile } from './api'
+import { ensureUserProfile, fetchCurrentUserProfile } from './api'
 
 type Profile = {
   id: string
@@ -17,6 +17,24 @@ type Profile = {
   avatar: string
   bio: string | null
   cover: string | null
+  location: string | null
+}
+
+function mapAuthError(message: string) {
+  const m = message.toLowerCase()
+  if (m.includes('fetch') || m.includes('network') || m.includes('failed to fetch')) {
+    return 'Sem conexão com o servidor. Tente de novo em instantes.'
+  }
+  if (m.includes('invalid login') || m.includes('invalid credentials')) {
+    return 'E-mail ou senha inválidos.'
+  }
+  if (m.includes('already registered') || m.includes('already been registered')) {
+    return 'Não foi possível criar a conta com estes dados.'
+  }
+  if (m.includes('password') && (m.includes('6') || m.includes('least'))) {
+    return 'A senha deve ter pelo menos 6 caracteres.'
+  }
+  return 'Não foi possível concluir. Tente de novo.'
 }
 
 type AuthContextValue = {
@@ -82,16 +100,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return error ? { error: error.message } : {}
+    if (error) return { error: mapAuthError(error.message) }
+    try {
+      await refreshProfile()
+    } catch {
+      /* profile load is best-effort after login */
+    }
+    return {}
   }
 
   const signUp = async (email: string, password: string, name: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { name } },
     })
-    return error ? { error: error.message } : {}
+    if (error) return { error: mapAuthError(error.message) }
+
+    if (!data.session) {
+      const signed = await supabase.auth.signInWithPassword({ email, password })
+      if (signed.error) return { error: mapAuthError(signed.error.message) }
+    }
+
+    try {
+      await ensureUserProfile(name)
+      await refreshProfile()
+    } catch {
+      return { error: 'A conta foi criada, mas o perfil não pôde ser salvo. Tente entrar de novo.' }
+    }
+    return {}
   }
 
   const signOut = async () => {

@@ -1,5 +1,6 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
-import { useState } from 'react'
+import type { ButtonHTMLAttributes, CSSProperties, InputHTMLAttributes, ReactNode } from 'react'
+import { useEffect, useState } from 'react'
+import { IMAGE_FALLBACK } from '../lib/media'
 
 /* Large CTA / standard buttons per design.md (§ buttons). */
 export function Button({
@@ -61,6 +62,37 @@ export function Field({
   )
 }
 
+export function MediaImg({
+  src,
+  alt = '',
+  className = '',
+  style,
+}: {
+  src?: string | null
+  alt?: string
+  className?: string
+  style?: CSSProperties
+}) {
+  const initial = src || IMAGE_FALLBACK
+  const [current, setCurrent] = useState(initial)
+
+  useEffect(() => {
+    setCurrent(src || IMAGE_FALLBACK)
+  }, [src])
+
+  return (
+    <img
+      src={current || IMAGE_FALLBACK}
+      alt={alt}
+      className={className}
+      style={style}
+      onError={() => {
+        if (current !== IMAGE_FALLBACK) setCurrent(IMAGE_FALLBACK)
+      }}
+    />
+  )
+}
+
 export function Avatar({
   src,
   alt = '',
@@ -80,7 +112,7 @@ export function Avatar({
     surface: 'ring-2 ring-surface',
   }
   return (
-    <img
+    <MediaImg
       src={src}
       alt={alt}
       style={{ width: size, height: size }}
@@ -93,7 +125,7 @@ export function AvatarStack({ srcs, size = 26 }: { srcs: string[]; size?: number
   return (
     <div className="flex items-center">
       {srcs.map((s, i) => (
-        <img
+        <MediaImg
           key={i}
           src={s}
           alt=""

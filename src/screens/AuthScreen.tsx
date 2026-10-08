@@ -1,5 +1,5 @@
 import { Logo, MoonIcon } from '../components/icons'
-import { Button, Checkbox, Field } from '../components/ui'
+import { Button, Checkbox, Field, MediaImg } from '../components/ui'
 import { photo } from '../lib/media'
 import { useState } from 'react'
 import { useAuth } from '../lib/auth'
@@ -51,6 +51,10 @@ export default function AuthScreen({
           setError('As senhas não coincidem.')
           return
         }
+        if (password.length < 6) {
+          setError('A senha deve ter pelo menos 6 caracteres.')
+          return
+        }
         const res = await signUp(email.trim(), password, name.trim() || 'Usuário')
         if (res.error) {
           setError(res.error)
@@ -74,7 +78,7 @@ export default function AuthScreen({
       <div className="flex h-full w-full flex-col gap-4 lg:flex-row lg:gap-6">
 
         <div className="relative hidden overflow-hidden rounded-3xl sm:block sm:h-48 lg:h-auto lg:flex-[7]">
-          <img src={c.hero} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <MediaImg src={c.hero} alt="" className="absolute inset-0 h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-black/20" />
           <div className="absolute left-6 top-6 flex items-center gap-2 rounded-full bg-black/30 px-3 py-1.5 backdrop-blur-sm">
             <span className="relative flex h-2.5 w-2.5">

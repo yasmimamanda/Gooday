@@ -5,6 +5,7 @@ import {
   ChevronDown, Lock, Users,
 } from 'lucide-react'
 import { contacts, groups, currentUser } from '../lib/media'
+import { MediaImg } from '../components/ui'
 
 type CreateMode = 'pick' | 'post' | 'story'
 type Privacy = 'Público' | 'Amigos' | 'Privado'
@@ -123,7 +124,7 @@ export default function Create({ onClose }: { onClose: () => void }) {
             className="relative flex w-full items-center justify-center overflow-hidden rounded-[16px] bg-[#eceef4] transition-colors hover:bg-[#dfe1ee] aspect-[9/16] max-h-[52vh]"
           >
             {photo ? (
-              <img src={photo} alt="" className="h-full w-full object-cover" />
+              <MediaImg src={photo} alt="" className="h-full w-full object-cover" />
             ) : (
               <div className="flex flex-col items-center gap-2 text-[#6c7186]">
                 <Image size={26} strokeWidth={1.5} />
@@ -182,7 +183,7 @@ export default function Create({ onClose }: { onClose: () => void }) {
           >
             {photo ? (
               <>
-                <img src={photo} alt="" className="w-full object-cover rounded-[16px] max-h-[320px]" />
+                <MediaImg src={photo} alt="" className="w-full object-cover rounded-[16px] max-h-[320px]" />
                 <button
                   onClick={(e) => { e.stopPropagation(); setPhoto(null) }}
                   className="absolute top-3 right-3 grid h-8 w-8 place-items-center rounded-full bg-black/60 text-white"
@@ -220,7 +221,7 @@ export default function Create({ onClose }: { onClose: () => void }) {
           {/* Caption with avatar + emoji */}
           <div className="flex items-start gap-3 rounded-[14px] px-3 py-3 bg-surface border border-neutral-200">
             <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full mt-0.5">
-              <img src={currentUser.avatar} alt="" className="h-full w-full object-cover" />
+              <MediaImg src={currentUser.avatar} alt="" className="h-full w-full object-cover" />
             </div>
             <div className="flex-1 min-w-0">
               <textarea
@@ -296,7 +297,7 @@ export default function Create({ onClose }: { onClose: () => void }) {
                   <div className="pb-1">
                     {tagSuggestions.map((c) => (
                       <button key={c.id} onClick={() => toggleTag(c.id)} className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-white/60">
-                        <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full"><img src={c.avatar} alt="" className="h-full w-full object-cover" /></div>
+                        <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full"><MediaImg src={c.avatar} alt="" className="h-full w-full object-cover" /></div>
                         <div className="min-w-0 flex-1">
                           <p className="text-[14px] font-medium text-[#0d0f13]">{c.name}</p>
                           <p className="text-[12px] text-[#6c7186]">{c.handle}</p>
@@ -391,7 +392,7 @@ export default function Create({ onClose }: { onClose: () => void }) {
                     className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-white/60 border-t border-neutral-200"
                   >
                     <div className="h-9 w-9 shrink-0 overflow-hidden rounded-[10px]">
-                      <img src={g.cover} alt="" className="h-full w-full object-cover" />
+                      <MediaImg src={g.cover} alt="" className="h-full w-full object-cover" />
                     </div>
                     <span className="flex-1 truncate text-[14px] text-[#0d0f13]">{g.name}</span>
                     {selectedGroup === g.name && <Check size={16} color="#004E44" />}

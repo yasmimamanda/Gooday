@@ -10,7 +10,7 @@ import {
   TopBar,
 } from '../components/home'
 import Notifications from '../components/Notifications'
-import { currentUser as mockUser, groups as mockGroups, posts as mockPosts, stories as mockStories } from '../lib/media'
+import { currentUser as mockUser, displayHandle, groups as mockGroups, posts as mockPosts, stories as mockStories } from '../lib/media'
 import type { Group, Post, Story } from '../lib/media'
 import { fetchFeedPosts, fetchGroups, fetchStories } from '../lib/api'
 import { useAuth } from '../lib/auth'
@@ -31,7 +31,7 @@ export default function Home({
   const [stories, setStories] = useState<Story[]>(mockStories)
 
   const user = profile
-    ? { name: profile.name, handle: profile.handle, avatar: profile.avatar }
+    ? { name: profile.name, handle: displayHandle(profile.handle), avatar: profile.avatar }
     : mockUser
 
   useEffect(() => {

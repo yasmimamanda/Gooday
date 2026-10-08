@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ChevronLeft } from 'lucide-react'
+import { MediaImg } from '../components/ui'
 
 const profileData: Record<string, {
   id: string
@@ -158,13 +159,13 @@ export default function Profile({
       <div className="mx-auto w-full max-w-[700px] px-4 pt-5 pb-10">
         {/* Cover — rounded, padded */}
         <div className="h-[160px] w-full overflow-hidden rounded-[18px]">
-          <img src={profile.cover} alt="" className="h-full w-full object-cover" />
+          <MediaImg src={profile.cover} alt="" className="h-full w-full object-cover" />
         </div>
 
         {/* Avatar overlapping cover */}
         <div className="-mt-10 ml-4 mb-4">
           <div className="h-[88px] w-[88px] overflow-hidden rounded-full ring-[3px] ring-canvas">
-            <img src={profile.avatar} alt={profile.name} className="h-full w-full object-cover" />
+            <MediaImg src={profile.avatar} alt={profile.name} className="h-full w-full object-cover" />
           </div>
         </div>
 
@@ -238,7 +239,7 @@ export default function Profile({
             <div className="grid grid-cols-3 gap-1 overflow-hidden rounded-[14px]">
               {profile.posts.map((src, i) => (
                 <div key={i} className="aspect-square overflow-hidden">
-                  <img src={src} alt="" className="h-full w-full object-cover transition-transform hover:scale-105" />
+                  <MediaImg src={src} alt="" className="h-full w-full object-cover transition-transform hover:scale-105" />
                 </div>
               ))}
             </div>

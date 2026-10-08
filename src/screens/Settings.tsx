@@ -16,7 +16,8 @@ import {
   AtSign,
   Trash2,
 } from 'lucide-react'
-import { currentUser as mockUser } from '../lib/media'
+import { currentUser as mockUser, displayHandle } from '../lib/media'
+import { MediaImg } from '../components/ui'
 import { useAuth } from '../lib/auth'
 
 type Section = 'main' | 'conta' | 'notificacoes' | 'privacidade' | 'aparencia'
@@ -97,9 +98,9 @@ function SectionLabel({ children }: { children: string }) {
 }
 
 export default function Settings({ onBack, onLogout }: { onBack: () => void; onLogout: () => void }) {
-  const { profile } = useAuth()
+  const { profile, user } = useAuth()
   const currentUser = profile
-    ? { name: profile.name, handle: profile.handle, avatar: profile.avatar }
+    ? { name: profile.name, handle: displayHandle(profile.handle), avatar: profile.avatar }
     : mockUser
   const [section, setSection] = useState<Section>('main')
   const [toggles, setToggles] = useState<Record<string, boolean>>({
@@ -149,7 +150,7 @@ export default function Settings({ onBack, onLogout }: { onBack: () => void; onL
             {/* User card */}
             <div className="mb-5 flex items-center gap-4 rounded-[18px] bg-surface px-4 py-4">
               <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full">
-                <img src={currentUser.avatar} alt="" className="h-full w-full object-cover" />
+                <MediaImg src={currentUser.avatar} alt="" className="h-full w-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[17px] font-semibold text-ink leading-tight">{currentUser.name}</p>
@@ -191,11 +192,11 @@ export default function Settings({ onBack, onLogout }: { onBack: () => void; onL
             <SectionLabel>Informações pessoais</SectionLabel>
             <div className="space-y-3">
               {[
-                { label: 'Nome completo', value: 'Marcos Vinícius' },
-                { label: 'Nome de usuário', value: '@marcos_v' },
-                { label: 'E-mail', value: 'marcos@gooday.app' },
+                { label: 'Nome completo', value: currentUser.name },
+                { label: 'Nome de usuário', value: currentUser.handle },
+                { label: 'E-mail', value: user?.email ?? '—' },
                 { label: 'Telefone', value: '+55 11 99999-0000' },
-                { label: 'Localização', value: 'São Paulo, SP' },
+                { label: 'Localização', value: profile?.location || 'São Paulo, SP' },
               ].map(({ label, value }) => (
                 <div key={label} className="rounded-[14px] bg-surface px-4 py-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.6px] text-neutral-400">{label}</p>

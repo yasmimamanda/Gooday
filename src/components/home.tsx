@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import type { LucideIcon } from 'lucide-react'
-import { Avatar, AvatarStack, Chip, IconButton } from './ui'
+import { Avatar, AvatarStack, Chip, IconButton, MediaImg } from './ui'
 import {
   BellIcon,
   BookmarkIcon,
@@ -83,7 +83,7 @@ function StoryViewer({
         </div>
 
         {/* cover */}
-        <img src={s.cover} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <MediaImg src={s.cover} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
 
         {/* header */}
@@ -193,7 +193,7 @@ export function StoriesRow({ stories }: { stories: Story[] }) {
               className="group relative w-[112px] h-[152px] shrink-0 overflow-hidden rounded-[20px] focus:outline-none [scroll-snap-align:start]"
             >
               {/* cover */}
-              <img
+              <MediaImg
                 src={s.cover}
                 alt=""
                 className={`absolute inset-0 h-full w-full object-cover transition-all duration-300 ${seen ? 'grayscale brightness-75' : 'group-hover:scale-105'}`}
@@ -240,7 +240,7 @@ export function GroupCard({ group, onOpenGroup }: { group: Group; onOpenGroup?: 
       onClick={() => onOpenGroup?.(group.id)}
     >
       <div className="relative h-24">
-        <img src={group.cover} alt="" className="h-full w-full object-cover" />
+        <MediaImg src={group.cover} alt="" className="h-full w-full object-cover" />
         <button
           aria-label="Compartilhar grupo"
           onClick={(e) => e.stopPropagation()}
@@ -300,7 +300,7 @@ export function PostCard({ post }: { post: Post }) {
       </div>
 
       <div className="relative mt-4 overflow-hidden rounded-lg">
-        <img src={post.image} alt="" className="max-h-[520px] w-full object-cover" />
+        <MediaImg src={post.image} alt="" className="max-h-[520px] w-full object-cover" />
         <div className="absolute bottom-3 left-3 flex gap-2">
           {post.reactions.map((r) => (
             <span
@@ -513,7 +513,7 @@ export function ContextRail({ groups, onOpenGroup }: { groups: Group[]; onOpenGr
                 <li key={c.id} className="flex items-center gap-3 rounded-xl px-2 py-2.5 hover:bg-neutral-50 transition-colors">
                   <div className="relative shrink-0">
                     <div className="h-10 w-10 overflow-hidden rounded-full">
-                      <img src={c.avatar} alt="" className="h-full w-full object-cover" />
+                      <MediaImg src={c.avatar} alt="" className="h-full w-full object-cover" />
                     </div>
                     {c.online && (
                       <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-green-500" />

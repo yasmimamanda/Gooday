@@ -7,6 +7,7 @@ import {
   type Conversation,
 } from '../lib/media'
 import { fetchContacts, fetchConversations } from '../lib/api'
+import { MediaImg } from '../components/ui'
 
 export default function Messages({
   onBack,
@@ -69,7 +70,7 @@ export default function Messages({
                     className="relative shrink-0 transition-opacity hover:opacity-80"
                   >
                     <div className="h-[52px] w-[52px] overflow-hidden rounded-full">
-                      <img src={contact.avatar} alt="" className="h-full w-full object-cover" />
+                      <MediaImg src={contact.avatar} alt="" className="h-full w-full object-cover" />
                     </div>
                     {contact.online && (
                       <span className="absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border-2 border-canvas bg-green-500" />

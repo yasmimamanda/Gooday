@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ChevronLeft, Users, Lock, Globe, Heart, MessageSquare, Share2, MoreHorizontal } from 'lucide-react'
 import { fetchGroupBySlug } from '../lib/api'
+import { MediaImg } from '../components/ui'
 
 const groupData: Record<string, {
   id: string
@@ -167,7 +168,7 @@ export default function GroupProfile({
 
         {/* Cover arredondada — igual ao Perfil */}
         <div className="h-[160px] w-full overflow-hidden rounded-[18px]">
-          <img src={group.cover} alt="" className="h-full w-full object-cover" />
+          <MediaImg src={group.cover} alt="" className="h-full w-full object-cover" />
         </div>
 
         {/* Nome + meta — igual à estrutura nome/handle do Perfil */}
@@ -208,7 +209,7 @@ export default function GroupProfile({
         <div className="mt-4 flex items-center gap-3">
           <div className="flex items-center">
             {group.memberAvatars.slice(0, 4).map((src, i) => (
-              <img
+              <MediaImg
                 key={i}
                 src={src}
                 alt=""
@@ -251,7 +252,7 @@ export default function GroupProfile({
                 {/* Header do post */}
                 <div className="flex items-center gap-3 px-4 pt-4 pb-2">
                   <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full">
-                    <img src={post.avatar} alt="" className="h-full w-full object-cover" />
+                    <MediaImg src={post.avatar} alt="" className="h-full w-full object-cover" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[14px] font-semibold text-ink leading-none">{post.name}</p>
@@ -268,7 +269,7 @@ export default function GroupProfile({
                 {/* Imagem */}
                 {post.image && (
                   <div className="mx-4 mb-3 overflow-hidden rounded-[12px] aspect-[4/3]">
-                    <img src={post.image} alt="" className="h-full w-full object-cover" />
+                    <MediaImg src={post.image} alt="" className="h-full w-full object-cover" />
                   </div>
                 )}
 

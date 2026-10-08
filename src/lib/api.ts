@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { faces } from './media'
 import type {
   ChatMessage,
   Contact,
@@ -33,10 +34,46 @@ export async function fetchCurrentUserProfile(userId?: string) {
     name: data.name,
     handle: data.handle,
     username: data.username ?? data.handle.replace(/^@/, ''),
-    avatar: data.avatar_url ?? '',
+    avatar: data.avatar_url ?? faces.marcos,
     bio: data.bio,
     cover: data.cover_url,
+    location: data.location,
   }
+}
+
+function slugifyHandle(name: string) {
+  const slug = name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_|_$/g, '')
+    .slice(0, 24)
+  return slug || 'user'
+}
+
+export async function ensureUserProfile(name: string) {
+  const { data: auth } = await supabase.auth.getUser()
+  const user = auth.user
+  if (!user) throw new Error('not authenticated')
+
+  const existing = await fetchCurrentUserProfile(user.id)
+  if (existing) return existing
+
+  const base = slugifyHandle(name || user.email?.split('@')[0] || 'user')
+  for (let i = 0; i < 20; i++) {
+    const username = i === 0 ? base : `${base}${i}`
+    const { error } = await supabase.from('users').insert({
+      id: user.id,
+      name: name.trim() || 'Usuário',
+      handle: `@${username}`,
+      username,
+      avatar_url: faces.marcos,
+    })
+    if (!error) return fetchCurrentUserProfile(user.id)
+    if (error.code !== '23505') throw error
+  }
+  throw new Error('handle collision')
 }
 
 export async function fetchFeedPosts(): Promise<Post[]> {
