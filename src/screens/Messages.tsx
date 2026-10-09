@@ -59,7 +59,7 @@ export default function Messages({
   }, [])
 
   return (
-    <div className="min-h-dvh bg-canvas">
+    <div className="min-h-dvh bg-canvas pb-28 min-[800px]:pb-0">
       {/* Header */}
       <header
         className="sticky top-0 z-20 flex items-center gap-3 bg-canvas px-4 py-3 border-b border-neutral-200"
@@ -75,7 +75,7 @@ export default function Messages({
       </header>
 
       {/* Conversation list */}
-      <div className="mx-auto max-w-[640px] pb-8">
+      <div className="mx-auto max-w-[640px] pb-4">
         <ul>
           {displayConversations.map((conv) => {
             const contact = contacts.find((c) => c.id === conv.contactId)

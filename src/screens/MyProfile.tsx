@@ -57,7 +57,7 @@ export default function MyProfile({
   const [draftBio, setDraftBio] = useState(myData.bio)
 
   return (
-    <div className="fixed inset-0 z-60 flex flex-col bg-canvas overflow-y-auto">
+    <div className="flex min-h-dvh flex-col overflow-y-auto bg-canvas pb-28 min-[800px]:pb-0">
 
       {/* Header */}
       <header className="sticky top-0 z-10 flex items-center gap-3 bg-surface px-4 py-3 border-b border-neutral-200">

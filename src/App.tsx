@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import AuthScreen from './screens/AuthScreen'
 import Home from './screens/Home'
 import Search from './screens/Search'
@@ -10,6 +10,7 @@ import MyProfile from './screens/MyProfile'
 import GroupProfile from './screens/GroupProfile'
 import Grupos from './screens/Grupos'
 import Settings from './screens/Settings'
+import { BottomNav } from './components/home'
 import { useAuth } from './lib/auth'
 
 type Screen =
@@ -80,8 +81,29 @@ export default function App() {
     )
   }
 
+  const hideMobileNav =
+    screen === 'search' ||
+    screen === 'chat' ||
+    screen === 'profile' ||
+    screen === 'group' ||
+    screen === 'settings' ||
+    screen === 'grupos' ||
+    screen === 'create' ||
+    screen === 'login' ||
+    screen === 'signup'
+
+  const navKey =
+    screen === 'myprofile' ? 'profile' : screen === 'messages' ? 'messages' : 'home'
+
+  const withMobileNav = (node: ReactNode) => (
+    <>
+      {node}
+      {!hideMobileNav && <BottomNav activeKey={navKey} onNavigate={navigate} />}
+    </>
+  )
+
   if (screen === 'search')
-    return (
+    return withMobileNav(
       <>
         <Home onNavigate={navigate} activeKey="search" onOpenGroup={(id) => openGroup(id, 'search')} onOpenProfile={(id) => openProfile(id, 'search')} />
         <Search
@@ -89,11 +111,11 @@ export default function App() {
           onOpenProfile={(id) => openProfile(id, 'search')}
           onOpenGroup={(id) => openGroup(id, 'search')}
         />
-      </>
+      </>,
     )
 
   if (screen === 'profile')
-    return (
+    return withMobileNav(
       <>
         <Home onNavigate={navigate} activeKey="home" onOpenGroup={(id) => openGroup(id, 'home')} onOpenProfile={(id) => openProfile(id, 'home')} />
         <Profile
@@ -104,19 +126,16 @@ export default function App() {
             setScreen('chat')
           }}
         />
-      </>
+      </>,
     )
 
   if (screen === 'myprofile')
-    return (
-      <>
-        <Home onNavigate={navigate} activeKey="profile" onOpenGroup={(id) => openGroup(id, 'home')} onOpenProfile={(id) => openProfile(id, 'home')} />
-        <MyProfile onBack={() => setScreen(prevScreen)} onSettings={() => setScreen('settings')} />
-      </>
+    return withMobileNav(
+      <MyProfile onBack={() => setScreen(prevScreen)} onSettings={() => setScreen('settings')} />,
     )
 
   if (screen === 'settings')
-    return (
+    return withMobileNav(
       <>
         <Home onNavigate={navigate} activeKey="settings" onOpenGroup={(id) => openGroup(id, 'home')} onOpenProfile={(id) => openProfile(id, 'home')} />
         <Settings
@@ -126,27 +145,27 @@ export default function App() {
             setScreen('login')
           }}
         />
-      </>
+      </>,
     )
 
   if (screen === 'group')
-    return (
+    return withMobileNav(
       <>
         <Home onNavigate={navigate} activeKey="home" onOpenGroup={(id) => openGroup(id, 'home')} onOpenProfile={(id) => openProfile(id, 'home')} />
         <GroupProfile groupId={groupId} onBack={() => setScreen(prevScreen)} />
-      </>
+      </>,
     )
 
   if (screen === 'grupos')
-    return (
+    return withMobileNav(
       <>
         <Home onNavigate={navigate} activeKey="grupos" onOpenGroup={(id) => openGroup(id, 'grupos')} onOpenProfile={(id) => openProfile(id, 'grupos')} />
         <Grupos onBack={() => setScreen('home')} onOpenGroup={(id) => openGroup(id, 'grupos')} />
-      </>
+      </>,
     )
 
   if (screen === 'messages')
-    return (
+    return withMobileNav(
       <Messages
         onBack={() => setScreen('home')}
         onSelectContact={(id) => {
@@ -154,22 +173,24 @@ export default function App() {
           setScreen('chat')
         }}
         onOpenProfile={(id) => openProfile(id, 'messages')}
-      />
+      />,
     )
 
   if (screen === 'chat')
-    return <Chat contactId={chatContactId} onBack={() => setScreen('messages')} />
+    return withMobileNav(<Chat contactId={chatContactId} onBack={() => setScreen('messages')} />)
 
   if (screen === 'create')
-    return (
+    return withMobileNav(
       <>
-        <Home onNavigate={navigate} activeKey="create" onOpenGroup={(id) => openGroup(id, 'home')} onOpenProfile={(id) => openProfile(id, 'home')} />
+        <Home onNavigate={navigate} activeKey="home" onOpenGroup={(id) => openGroup(id, 'home')} onOpenProfile={(id) => openProfile(id, 'home')} />
         <Create onClose={() => setScreen('home')} />
-      </>
+      </>,
     )
 
   if (screen === 'home')
-    return <Home onNavigate={navigate} activeKey="home" onOpenGroup={(id) => openGroup(id, 'home')} onOpenProfile={(id) => openProfile(id, 'home')} />
+    return withMobileNav(
+      <Home onNavigate={navigate} activeKey="home" onOpenGroup={(id) => openGroup(id, 'home')} onOpenProfile={(id) => openProfile(id, 'home')} />,
+    )
 
   return (
     <AuthScreen

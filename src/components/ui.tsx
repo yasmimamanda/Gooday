@@ -86,6 +86,8 @@ export function MediaImg({
       alt={alt}
       className={className}
       style={style}
+      referrerPolicy="no-referrer"
+      decoding="async"
       onError={() => {
         if (current !== IMAGE_FALLBACK) setCurrent(IMAGE_FALLBACK)
       }}

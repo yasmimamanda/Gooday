@@ -42,12 +42,12 @@ export const photo = {
   mealPrep: 'https://images.unsplash.com/photo-1543352632-5a4b24e4d2a6?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
   yogaMeditation: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
   mountainSit: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
-  sprintTrack: 'https://images.unsplash.com/photo-1483721310020-03333e27aaa5?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
+  sprintTrack: u('1552674605-db6ffd4facb5', 400, 700),
   pinkTank: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
   orangeSlice: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=700',
 }
 
-export const IMAGE_FALLBACK = faces.marcos
+export const IMAGE_FALLBACK = '/assets/40f99.png'
 
 export function displayHandle(handle?: string | null) {
   if (!handle) return '@marcos_v'

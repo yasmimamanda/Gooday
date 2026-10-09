@@ -190,22 +190,24 @@ export async function fetchStories(viewerId?: string): Promise<Story[]> {
     for (const v of views ?? []) seen.add(v.story_id)
   }
 
-  const mapped: Story[] = (stories ?? []).map((s) => {
-    const author = s.users as {
-      name: string
-      handle: string
-      username: string | null
-      avatar_url: string | null
-    } | null
-    const media = s.media as { url: string }[] | null
-    const isMe = s.author_id === viewer
-    return {
-      name: isMe ? 'Você' : author?.username ?? author?.handle?.replace(/^@/, '') ?? 'user',
-      avatar: author?.avatar_url ?? '',
-      cover: media?.[0]?.url ?? '',
-      seen: seen.has(s.id),
-    }
-  })
+  const mapped: Story[] = (stories ?? [])
+    .map((s) => {
+      const author = s.users as {
+        name: string
+        handle: string
+        username: string | null
+        avatar_url: string | null
+      } | null
+      const media = s.media as { url: string }[] | null
+      const isMe = s.author_id === viewer
+      return {
+        name: isMe ? 'Você' : author?.username ?? author?.handle?.replace(/^@/, '') ?? 'user',
+        avatar: author?.avatar_url ?? '',
+        cover: media?.[0]?.url ?? '',
+        seen: seen.has(s.id),
+      }
+    })
+    .filter((s) => s.cover)
 
   return sortStories(mapped)
 }

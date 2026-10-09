@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import {
-  BottomNav,
   ContextRail,
   GroupCard,
   MobileHeader,
@@ -65,7 +64,8 @@ export default function Home({
         if (cancelled) return
         if (p.length) setPosts(p)
         if (g.length) setGroups(g)
-        if (s.length) setStories(s)
+        const validStories = s.filter((story) => story.cover)
+        if (validStories.length) setStories(mergeStories(validStories, mockStories))
       } catch (err) {
         console.warn('[Gooday] Falling back to mock feed data', err)
       }
@@ -132,7 +132,6 @@ export default function Home({
         </div>
       </div>
 
-      <BottomNav activeKey={activeKey} onNavigate={onNavigate} />
     </div>
   )
 }
