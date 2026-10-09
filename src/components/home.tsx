@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { Avatar, AvatarStack, Chip, IconButton, MediaImg } from './ui'
 import {
@@ -22,8 +22,9 @@ import {
   ConnectIcon,
   FilterIcon,
 } from './icons'
-import { contacts } from '../lib/media'
+import { contacts, sortStories, storyKey } from '../lib/media'
 import type { Group, Post, Story } from '../lib/media'
+import { useSession } from '../lib/session'
 
 /* ------------------------------- Stories carousel ----------------------
    Horizontally scrollable row. Seen stories appear desaturated with a
@@ -119,13 +120,20 @@ function StoryViewer({
   )
 }
 
-export function StoriesRow({ stories }: { stories: Story[] }) {
-  const [seenSet, setSeenSet] = useState<Set<number>>(
-    () => new Set(stories.map((s, i) => (s.seen ? i : -1)).filter((i) => i >= 0)),
-  )
-  const [viewerIndex, setViewerIndex] = useState<number | null>(null)
+export function StoriesRow({ stories, onAddStory }: { stories: Story[]; onAddStory?: () => void }) {
+  const { seenStoryKeys, markStorySeen } = useSession()
+  const [viewer, setViewer] = useState<{ list: Story[]; index: number; seen: Set<number> } | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const drag = useRef({ active: false, startX: 0, scrollX: 0, moved: false })
+  const viewerListRef = useRef<Story[]>([])
+
+  const ordered = useMemo(() => {
+    const withSeen = stories.map((s) => ({
+      ...s,
+      seen: s.seen || seenStoryKeys.has(storyKey(s)),
+    }))
+    return sortStories(withSeen)
+  }, [stories, seenStoryKeys])
 
   useEffect(() => {
     const el = scrollRef.current
@@ -159,20 +167,32 @@ export function StoriesRow({ stories }: { stories: Story[] }) {
     }
   }, [])
 
-  const markSeen = useCallback((i: number) => {
-    setSeenSet((prev) => {
-      if (prev.has(i)) return prev
-      const next = new Set(prev)
-      next.add(i)
-      return next
-    })
-  }, [])
-
   const openStory = (i: number) => {
     if (drag.current.moved) return
-    markSeen(i)
-    setViewerIndex(i)
+    const list = ordered
+    const key = storyKey(list[i])
+    markStorySeen(key)
+    const seen = new Set<number>()
+    list.forEach((s, idx) => {
+      if (s.seen || storyKey(s) === key) seen.add(idx)
+    })
+    viewerListRef.current = list
+    setViewer({ list, index: i, seen })
   }
+
+  const markViewerSeen = useCallback(
+    (i: number) => {
+      const s = viewerListRef.current[i]
+      if (s) markStorySeen(storyKey(s))
+      setViewer((prev) => {
+        if (!prev || prev.seen.has(i)) return prev
+        const next = new Set(prev.seen)
+        next.add(i)
+        return { ...prev, seen: next }
+      })
+    },
+    [markStorySeen],
+  )
 
   return (
     <>
@@ -182,12 +202,12 @@ export function StoriesRow({ stories }: { stories: Story[] }) {
       >
         {/* Left spacer: provides initial gap from edge; scrolls away naturally when dragging */}
         <div className="w-5 shrink-0" aria-hidden />
-        {stories.map((s, i) => {
-          const seen = seenSet.has(i)
-          const isYou = i === 0
+        {ordered.map((s, i) => {
+          const seen = !!s.seen
+          const isYou = s.name === 'Você'
           return (
             <button
-              key={i}
+              key={storyKey(s)}
               onClick={() => openStory(i)}
               aria-label={`Ver story de ${s.name}`}
               className="group relative w-[112px] h-[152px] shrink-0 overflow-hidden rounded-[20px] focus:outline-none [scroll-snap-align:start]"
@@ -208,7 +228,14 @@ export function StoriesRow({ stories }: { stories: Story[] }) {
 
               {/* "+" add story on your own card */}
               {isYou && (
-                <span className="absolute bottom-3 right-3 grid h-5 w-5 place-items-center rounded-full bg-accent text-white shadow">
+                <span
+                  data-add-story=""
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onAddStory?.()
+                  }}
+                  className="absolute bottom-3 right-3 grid h-5 w-5 place-items-center rounded-full bg-accent text-white shadow"
+                >
                   <PlusIcon width={12} height={12} />
                 </span>
               )}
@@ -219,13 +246,13 @@ export function StoriesRow({ stories }: { stories: Story[] }) {
         <div className="w-5 shrink-0" aria-hidden />
       </div>
 
-      {viewerIndex !== null && (
+      {viewer && (
         <StoryViewer
-          stories={stories}
-          startIndex={viewerIndex}
-          seenSet={seenSet}
-          onSee={markSeen}
-          onClose={() => setViewerIndex(null)}
+          stories={viewer.list}
+          startIndex={viewer.index}
+          seenSet={viewer.seen}
+          onSee={markViewerSeen}
+          onClose={() => setViewer(null)}
         />
       )}
     </>
@@ -288,30 +315,39 @@ export function PostCard({ post }: { post: Post }) {
         </IconButton>
       </header>
 
-      <p className="mt-3 text-[15px] leading-relaxed text-neutral-700">
-        {post.text}{' '}
-        {post.mention && <span className="font-medium text-accent-600">{post.mention}</span>} 😋
-      </p>
+      {post.text ? (
+        <p className="mt-3 text-[15px] leading-relaxed text-neutral-700">
+          {post.text}{' '}
+          {post.mention && <span className="font-medium text-accent-600">{post.mention}</span>}{' '}
+          😋
+        </p>
+      ) : null}
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        {post.tags.map((t) => (
-          <Chip key={t}>{t}</Chip>
-        ))}
-      </div>
-
-      <div className="relative mt-4 overflow-hidden rounded-lg">
-        <MediaImg src={post.image} alt="" className="max-h-[520px] w-full object-cover" />
-        <div className="absolute bottom-3 left-3 flex gap-2">
-          {post.reactions.map((r) => (
-            <span
-              key={r.emoji}
-              className="flex items-center gap-1 rounded-full bg-surface/90 px-2.5 py-1 text-[13px] font-medium text-ink backdrop-blur-sm"
-            >
-              {r.emoji} {r.count}
-            </span>
+      {post.tags.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {post.tags.map((t) => (
+            <Chip key={t}>{t}</Chip>
           ))}
         </div>
-      </div>
+      )}
+
+      {post.image ? (
+        <div className="relative mt-4 overflow-hidden rounded-lg">
+          <MediaImg src={post.image} alt="" className="max-h-[520px] w-full object-cover" />
+          {post.reactions.length > 0 && (
+            <div className="absolute bottom-3 left-3 flex gap-2">
+              {post.reactions.map((r) => (
+                <span
+                  key={r.emoji}
+                  className="flex items-center gap-1 rounded-full bg-surface/90 px-2.5 py-1 text-[13px] font-medium text-ink backdrop-blur-sm"
+                >
+                  {r.emoji} {r.count}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : null}
 
       <footer className="mt-4 flex items-center justify-between text-neutral-500">
         <div className="flex items-center gap-5">

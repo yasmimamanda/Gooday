@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { contacts as mockContacts, chatHistory, type ChatMessage, type Contact } from '../lib/media'
 import { fetchChatMessages, fetchContacts } from '../lib/api'
-import { supabase } from '../lib/supabase'
-import { useAuth } from '../lib/auth'
 import { MediaImg } from '../components/ui'
+import { useSession } from '../lib/session'
 
 export default function Chat({
   contactId,
@@ -12,14 +11,15 @@ export default function Chat({
   contactId: string
   onBack: () => void
 }) {
-  const { user } = useAuth()
+  const { messagesByContact, addMessage } = useSession()
   const [contacts, setContacts] = useState<Contact[]>(mockContacts)
   const contact = contacts.find((c) => c.id === contactId)
   const initial = chatHistory[contactId] ?? []
 
-  const [messages, setMessages] = useState<ChatMessage[]>(initial)
+  const [baseMessages, setBaseMessages] = useState<ChatMessage[]>(initial)
   const [draft, setDraft] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
+  const messages = [...baseMessages, ...(messagesByContact[contactId] ?? [])]
 
   useEffect(() => {
     let cancelled = false
@@ -28,7 +28,7 @@ export default function Chat({
         const [c, msgs] = await Promise.all([fetchContacts(), fetchChatMessages(contactId)])
         if (cancelled) return
         if (c.length) setContacts(c)
-        if (msgs.length) setMessages(msgs)
+        if (msgs.length) setBaseMessages(msgs)
       } catch (err) {
         console.warn('[Gooday] Falling back to mock chat', err)
       }
@@ -42,41 +42,13 @@ export default function Chat({
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const sendMessage = async () => {
+  const sendMessage = () => {
     const text = draft.trim()
     if (!text) return
     const now = new Date()
     const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-    const optimistic: ChatMessage = { id: String(Date.now()), text, time, fromMe: true }
-    setMessages((prev) => [...prev, optimistic])
+    addMessage(contactId, { id: String(Date.now()), text, time, fromMe: true })
     setDraft('')
-
-    if (!user) return
-    try {
-      const { data: other } = await supabase.from('users').select('id').eq('username', contactId).maybeSingle()
-      if (!other) return
-      const { data: myParts } = await supabase
-        .from('conversation_participants')
-        .select('conversation_id')
-        .eq('user_id', user.id)
-      const ids = (myParts ?? []).map((p) => p.conversation_id)
-      if (!ids.length) return
-      const { data: shared } = await supabase
-        .from('conversation_participants')
-        .select('conversation_id')
-        .eq('user_id', other.id)
-        .in('conversation_id', ids)
-        .limit(1)
-      const convId = shared?.[0]?.conversation_id
-      if (!convId) return
-      await supabase.from('messages').insert({
-        conversation_id: convId,
-        sender_id: user.id,
-        body: text,
-      })
-    } catch (err) {
-      console.warn('[Gooday] Could not persist message', err)
-    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

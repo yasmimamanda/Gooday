@@ -8,6 +8,7 @@ import {
 } from '../lib/media'
 import { fetchContacts, fetchConversations } from '../lib/api'
 import { MediaImg } from '../components/ui'
+import { useSession } from '../lib/session'
 
 export default function Messages({
   onBack,
@@ -20,6 +21,25 @@ export default function Messages({
 }) {
   const [contacts, setContacts] = useState<Contact[]>(mockContacts)
   const [conversations, setConversations] = useState<Conversation[]>(mockConversations)
+  const { messagesByContact } = useSession()
+  const displayConversations = conversations
+    .map((conv) => {
+      const extras = messagesByContact[conv.contactId]
+      const last = extras?.[extras.length - 1]
+      if (!last) return conv
+      return {
+        ...conv,
+        lastMessage: last.text,
+        time: last.time,
+        fromMe: last.fromMe,
+        unread: 0,
+      }
+    })
+    .sort((a, b) => {
+      const aLive = messagesByContact[a.contactId]?.length ? 0 : 1
+      const bLive = messagesByContact[b.contactId]?.length ? 0 : 1
+      return aLive - bLive
+    })
 
   useEffect(() => {
     let cancelled = false
@@ -57,7 +77,7 @@ export default function Messages({
       {/* Conversation list */}
       <div className="mx-auto max-w-[640px] pb-8">
         <ul>
-          {conversations.map((conv) => {
+          {displayConversations.map((conv) => {
             const contact = contacts.find((c) => c.id === conv.contactId)
             if (!contact) return null
             return (

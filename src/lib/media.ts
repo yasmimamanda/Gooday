@@ -61,6 +61,23 @@ export const currentUser = {
 }
 
 export type Story = { name: string; avatar: string; cover: string; seen?: boolean }
+
+export function storyKey(s: Story) {
+  return `${s.name}::${s.cover}`
+}
+
+/** Own story stays first; unseen (colored) next; seen (gray) last. */
+export function sortStories(stories: Story[]): Story[] {
+  const own: Story[] = []
+  const unseen: Story[] = []
+  const seen: Story[] = []
+  for (const s of stories) {
+    if (s.name === 'Você') own.push(s)
+    else if (s.seen) seen.push(s)
+    else unseen.push(s)
+  }
+  return [...own, ...unseen, ...seen]
+}
 export const stories: Story[] = [
   { name: 'Você', avatar: currentUser.avatar, cover: photo.saladBowl, seen: false },
   { name: 'bruna_carla', avatar: faces.bruna, cover: photo.wellnessWoman, seen: true },
@@ -204,6 +221,7 @@ export const chatHistory: Record<string, ChatMessage[]> = {
 }
 
 export type Post = {
+  id?: string
   author: string
   avatar: string
   time: string

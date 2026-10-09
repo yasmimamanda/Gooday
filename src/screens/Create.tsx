@@ -4,8 +4,11 @@ import {
   ChevronRight, Image, Check, Search as SearchIcon, Smile,
   ChevronDown, Lock, Users,
 } from 'lucide-react'
-import { contacts, groups, currentUser } from '../lib/media'
+import { contacts, groups, currentUser, displayHandle } from '../lib/media'
+import type { Post, Story } from '../lib/media'
 import { MediaImg } from '../components/ui'
+import { useAuth } from '../lib/auth'
+import { useSession } from '../lib/session'
 
 type CreateMode = 'pick' | 'post' | 'story'
 type Privacy = 'Público' | 'Amigos' | 'Privado'
@@ -13,6 +16,8 @@ type Privacy = 'Público' | 'Amigos' | 'Privado'
 const EMOJI_LIST = ['😊','🌿','💪','🥗','🏃','❤️','🔥','✨','🧘','🚴','🥤','🌱','👏','😍','🙌','💚']
 
 export default function Create({ onClose }: { onClose: () => void }) {
+  const { profile } = useAuth()
+  const { addPost, addStory } = useSession()
   const [mode, setMode] = useState<CreateMode>('pick')
   const [photo, setPhoto] = useState<string | null>(null)
   const [caption, setCaption] = useState('')
@@ -55,6 +60,44 @@ export default function Create({ onClose }: { onClose: () => void }) {
     : []
 
   const canShare = !!photo || caption.trim().length > 0
+
+  const author = {
+    name: profile?.name ?? currentUser.name,
+    handle: displayHandle(profile?.handle ?? currentUser.handle),
+    avatar: profile?.avatar || currentUser.avatar,
+  }
+
+  const publishStory = () => {
+    if (!photo) return
+    const story: Story = {
+      name: 'Você',
+      avatar: author.avatar,
+      cover: photo,
+      seen: false,
+    }
+    addStory(story)
+    onClose()
+  }
+
+  const publishPost = () => {
+    if (!canShare) return
+    const tags = [...caption.matchAll(/#(\w+)/g)].map((m) => `#${m[1]}`)
+    const mentionMatch = caption.match(/@[\w.]+/)
+    const post: Post = {
+      author: author.handle,
+      avatar: author.avatar,
+      time: 'agora',
+      text: caption.trim(),
+      mention: mentionMatch?.[0],
+      tags,
+      image: photo ?? '',
+      reactions: [],
+      likes: 0,
+      comments: 0,
+    }
+    addPost(post)
+    onClose()
+  }
 
   const privacyOptions: Privacy[] = ['Público', 'Amigos', 'Privado']
   const privacyIcons: Record<Privacy, typeof Globe> = { Público: Globe, Amigos: Users, Privado: Lock }
@@ -148,7 +191,7 @@ export default function Create({ onClose }: { onClose: () => void }) {
             </div>
           )}
           <button
-            onClick={onClose}
+            onClick={publishStory}
             disabled={!photo}
             className={`mt-4 w-full rounded-[12px] py-3.5 text-[14px] font-semibold text-[#0d0f13] transition-opacity ${photo ? 'opacity-100' : 'opacity-40'}`}
             style={{ background: '#e7fe8e' }}
@@ -221,7 +264,7 @@ export default function Create({ onClose }: { onClose: () => void }) {
           {/* Caption with avatar + emoji */}
           <div className="flex items-start gap-3 rounded-[14px] px-3 py-3 bg-surface border border-neutral-200">
             <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full mt-0.5">
-              <MediaImg src={currentUser.avatar} alt="" className="h-full w-full object-cover" />
+              <MediaImg src={author.avatar} alt="" className="h-full w-full object-cover" />
             </div>
             <div className="flex-1 min-w-0">
               <textarea
@@ -404,7 +447,7 @@ export default function Create({ onClose }: { onClose: () => void }) {
 
           {/* Share button */}
           <button
-            onClick={onClose}
+            onClick={publishPost}
             disabled={!canShare}
             className={`w-full rounded-[14px] py-3.5 text-[15px] font-bold text-[#0d0f13] transition-opacity ${canShare ? 'opacity-100' : 'opacity-40'}`}
             style={{ background: '#d4f535' }}

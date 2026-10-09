@@ -14,6 +14,7 @@ import { currentUser as mockUser, displayHandle, groups as mockGroups, posts as 
 import type { Group, Post, Story } from '../lib/media'
 import { fetchFeedPosts, fetchGroups, fetchStories } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { mergeStories, useSession } from '../lib/session'
 
 export default function Home({
   onNavigate,
@@ -26,9 +27,12 @@ export default function Home({
 }) {
   const [showNotifs, setShowNotifs] = useState(false)
   const { profile } = useAuth()
+  const { posts: sessionPosts, stories: sessionStories } = useSession()
   const [posts, setPosts] = useState<Post[]>(mockPosts)
   const [groups, setGroups] = useState<Group[]>(mockGroups)
   const [stories, setStories] = useState<Story[]>(mockStories)
+  const feedPosts = [...sessionPosts, ...posts]
+  const feedStories = mergeStories(sessionStories, stories)
 
   const user = profile
     ? { name: profile.name, handle: displayHandle(profile.handle), avatar: profile.avatar }
@@ -64,7 +68,7 @@ export default function Home({
 
       <div className="w-full px-5 min-[1800px]:px-8">
         <section className="py-4">
-          <StoriesRow stories={stories} />
+          <StoriesRow stories={feedStories} onAddStory={() => onNavigate?.('create')} />
         </section>
 
         <section className="min-[800px]:hidden">
@@ -86,8 +90,8 @@ export default function Home({
           </aside>
 
           <main className="mx-auto w-full max-w-[640px] space-y-5 min-[800px]:mx-0 min-[800px]:max-w-none">
-            {posts.map((p, i) => (
-              <PostCard key={`${p.author}-${p.time}-${i}`} post={p} />
+            {feedPosts.map((p, i) => (
+              <PostCard key={p.id ?? `${p.author}-${p.time}-${i}`} post={p} />
             ))}
           </main>
 

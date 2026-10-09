@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { faces } from './media'
+import { faces, sortStories } from './media'
 import type {
   ChatMessage,
   Contact,
@@ -207,13 +207,7 @@ export async function fetchStories(viewerId?: string): Promise<Story[]> {
     }
   })
 
-  mapped.sort((a, b) => {
-    if (a.name === 'Você') return -1
-    if (b.name === 'Você') return 1
-    return 0
-  })
-
-  return mapped
+  return sortStories(mapped)
 }
 
 export async function fetchContacts(): Promise<Contact[]> {

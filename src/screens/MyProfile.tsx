@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { ChevronLeft, Settings, Grid3x3, Heart, MessageSquare, Camera, Edit3 } from 'lucide-react'
+import { ChevronLeft, Settings, Grid3x3, Heart, Camera, Edit3 } from 'lucide-react'
 import { currentUser as mockUser, displayHandle } from '../lib/media'
 import { MediaImg } from '../components/ui'
 import { useAuth } from '../lib/auth'
+import { useSession } from '../lib/session'
 
 type Tab = 'posts' | 'curtidas'
 
@@ -14,6 +15,7 @@ export default function MyProfile({
   onSettings: () => void
 }) {
   const { profile } = useAuth()
+  const { posts: sessionPosts, stories: sessionStories } = useSession()
   const myData = {
     name: profile?.name ?? 'Marcos Vinícius',
     handle: displayHandle(profile?.handle ?? '@marcos_v'),
@@ -33,6 +35,22 @@ export default function MyProfile({
       'https://images.unsplash.com/photo-1533240332313-0db49b459ad6?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=400&h=400',
     ],
   }
+
+  const livePosts = [
+    ...sessionPosts.map((p, i) => ({
+      id: p.id ?? `session-post-${i}`,
+      src: p.image,
+      text: p.text,
+    })),
+    ...sessionStories
+      .filter((s) => s.name === 'Você')
+      .map((s, i) => ({
+        id: `session-story-${i}`,
+        src: s.cover,
+        text: '',
+      })),
+    ...myData.posts.map((src, i) => ({ id: `seed-${i}`, src, text: '' })),
+  ]
 
   const [tab, setTab] = useState<Tab>('posts')
   const [editing, setEditing] = useState(false)
@@ -147,7 +165,7 @@ export default function MyProfile({
           {[
             { label: 'seguidores', value: myData.followers.toLocaleString('pt-BR') },
             { label: 'seguindo', value: myData.following.toLocaleString('pt-BR') },
-            { label: 'publicações', value: myData.posts.length.toString() },
+            { label: 'publicações', value: livePosts.length.toString() },
           ].map(({ label, value }) => (
             <button key={label} className="flex flex-col items-start gap-0.5 transition-opacity hover:opacity-70">
               <span className="text-[20px] font-bold text-ink leading-none">{value}</span>
@@ -197,7 +215,7 @@ export default function MyProfile({
 
         {/* Posts grid */}
         {tab === 'posts' && (
-          myData.posts.length === 0 ? (
+          livePosts.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-16">
               <div className="grid h-14 w-14 place-items-center rounded-full bg-neutral-100">
                 <Grid3x3 size={24} className="text-neutral-400" />
@@ -207,9 +225,15 @@ export default function MyProfile({
             </div>
           ) : (
             <div className="mt-3 grid grid-cols-3 gap-1 overflow-hidden rounded-[14px]">
-              {myData.posts.map((src, i) => (
-                <div key={i} className="aspect-square overflow-hidden">
-                  <MediaImg src={src} alt="" className="h-full w-full object-cover transition-transform hover:scale-105" />
+              {livePosts.map((item) => (
+                <div key={item.id} className="aspect-square overflow-hidden bg-neutral-100">
+                  {item.src ? (
+                    <MediaImg src={item.src} alt="" className="h-full w-full object-cover transition-transform hover:scale-105" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center p-2 text-center text-[11px] leading-snug text-neutral-600">
+                      {item.text || 'Publicação'}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
