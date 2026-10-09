@@ -11,6 +11,7 @@ import {
 } from '../components/home'
 import Notifications from '../components/Notifications'
 import { currentUser as mockUser, displayHandle, groups as mockGroups, posts as mockPosts, stories as mockStories } from '../lib/media'
+import { personIdFromAuthor } from './Profile'
 import type { Group, Post, Story } from '../lib/media'
 import { fetchFeedPosts, fetchGroups, fetchStories } from '../lib/api'
 import { useAuth } from '../lib/auth'
@@ -20,23 +21,37 @@ export default function Home({
   onNavigate,
   activeKey,
   onOpenGroup,
+  onOpenProfile,
 }: {
   onNavigate?: (key: string) => void
   activeKey?: string
   onOpenGroup?: (id: string) => void
+  onOpenProfile?: (id: string) => void
 }) {
   const [showNotifs, setShowNotifs] = useState(false)
   const { profile } = useAuth()
-  const { posts: sessionPosts, stories: sessionStories } = useSession()
+  const { posts: sessionPosts, stories: sessionStories, profileDraft } = useSession()
   const [posts, setPosts] = useState<Post[]>(mockPosts)
   const [groups, setGroups] = useState<Group[]>(mockGroups)
   const [stories, setStories] = useState<Story[]>(mockStories)
   const feedPosts = [...sessionPosts, ...posts]
   const feedStories = mergeStories(sessionStories, stories)
 
-  const user = profile
-    ? { name: profile.name, handle: displayHandle(profile.handle), avatar: profile.avatar }
-    : mockUser
+  const myHandle = displayHandle(profileDraft.handle ?? profile?.handle ?? mockUser.handle)
+  const user = {
+    name: profileDraft.name ?? profile?.name ?? mockUser.name,
+    handle: myHandle,
+    avatar: profileDraft.avatar || profile?.avatar || mockUser.avatar,
+  }
+
+  const openAuthor = (author: string) => {
+    if (displayHandle(author) === myHandle) {
+      onNavigate?.('profile')
+      return
+    }
+    const id = personIdFromAuthor(author)
+    if (id) onOpenProfile?.(id)
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -91,7 +106,11 @@ export default function Home({
 
           <main className="mx-auto w-full max-w-[640px] space-y-5 min-[800px]:mx-0 min-[800px]:max-w-none">
             {feedPosts.map((p, i) => (
-              <PostCard key={p.id ?? `${p.author}-${p.time}-${i}`} post={p} />
+              <PostCard
+                key={p.id ?? `${p.author}-${p.time}-${i}`}
+                post={p}
+                onOpenAuthor={() => openAuthor(p.author)}
+              />
             ))}
           </main>
 

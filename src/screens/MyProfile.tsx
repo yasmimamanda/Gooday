@@ -15,14 +15,14 @@ export default function MyProfile({
   onSettings: () => void
 }) {
   const { profile } = useAuth()
-  const { posts: sessionPosts, stories: sessionStories } = useSession()
+  const { posts: sessionPosts, stories: sessionStories, profileDraft, updateProfile } = useSession()
   const myData = {
-    name: profile?.name ?? 'Marcos Vinícius',
-    handle: displayHandle(profile?.handle ?? '@marcos_v'),
-    avatar: profile?.avatar || mockUser.avatar,
-    cover: profile?.cover || 'https://images.unsplash.com/photo-1530143311094-34d807799e8f?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900&h=400',
-    location: profile?.location || 'São Paulo, SP',
-    bio: profile?.bio || 'Corredor amador e entusiasta de vida saudável. Acredito que movimento é remédio. 🏃‍♂️',
+    name: profileDraft.name ?? profile?.name ?? 'Marcos Vinícius',
+    handle: displayHandle(profileDraft.handle ?? profile?.handle ?? '@marcos_v'),
+    avatar: profileDraft.avatar || profile?.avatar || mockUser.avatar,
+    cover: profileDraft.cover || profile?.cover || 'https://images.unsplash.com/photo-1530143311094-34d807799e8f?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900&h=400',
+    location: profileDraft.location ?? profile?.location ?? 'São Paulo, SP',
+    bio: profileDraft.bio ?? profile?.bio ?? 'Corredor amador e entusiasta de vida saudável. Acredito que movimento é remédio. 🏃‍♂️',
     interests: ['Corrida', 'Nutrição', 'Hiking', 'Ciclismo'],
     followers: 1240,
     following: 318,
@@ -54,8 +54,7 @@ export default function MyProfile({
 
   const [tab, setTab] = useState<Tab>('posts')
   const [editing, setEditing] = useState(false)
-  const [bio, setBio] = useState(myData.bio)
-  const [draftBio, setDraftBio] = useState(bio)
+  const [draftBio, setDraftBio] = useState(myData.bio)
 
   return (
     <div className="fixed inset-0 z-60 flex flex-col bg-canvas overflow-y-auto">
@@ -126,13 +125,13 @@ export default function MyProfile({
             />
             <div className="mt-2 flex gap-2">
               <button
-                onClick={() => { setBio(draftBio); setEditing(false) }}
+                onClick={() => { updateProfile({ bio: draftBio }); setEditing(false) }}
                 className="rounded-full bg-secondary-500 px-4 py-1.5 text-[13px] font-semibold text-white transition-colors hover:bg-secondary-600"
               >
                 Salvar
               </button>
               <button
-                onClick={() => { setDraftBio(bio); setEditing(false) }}
+                onClick={() => { setDraftBio(myData.bio); setEditing(false) }}
                 className="rounded-full bg-neutral-100 px-4 py-1.5 text-[13px] font-semibold text-neutral-700 transition-colors hover:bg-neutral-200"
               >
                 Cancelar
@@ -142,9 +141,9 @@ export default function MyProfile({
         ) : (
           <p
             className="mt-3 cursor-text text-[14px] leading-relaxed text-neutral-700"
-            onClick={() => { setDraftBio(bio); setEditing(true) }}
+            onClick={() => { setDraftBio(myData.bio); setEditing(true) }}
           >
-            {bio}
+            {myData.bio}
           </p>
         )}
 
@@ -177,7 +176,7 @@ export default function MyProfile({
         {/* Action buttons */}
         <div className="mt-5 flex gap-3">
           <button
-            onClick={() => { setDraftBio(bio); setEditing(true) }}
+            onClick={onSettings}
             className="flex flex-1 items-center justify-center gap-2 rounded-[14px] bg-secondary-500 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-secondary-600"
           >
             <Edit3 size={16} />

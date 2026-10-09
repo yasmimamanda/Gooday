@@ -6,39 +6,46 @@ import {
   Lock,
   Palette,
   User,
-  Globe,
   HelpCircle,
   LogOut,
   Moon,
   Smartphone,
   Shield,
   Eye,
-  AtSign,
   Trash2,
 } from 'lucide-react'
 import { currentUser as mockUser, displayHandle } from '../lib/media'
 import { MediaImg } from '../components/ui'
 import { useAuth } from '../lib/auth'
+import { useSession } from '../lib/session'
 
 type Section = 'main' | 'conta' | 'notificacoes' | 'privacidade' | 'aparencia'
 
-interface ToggleItem {
-  id: string
-  label: string
-  description?: string
-  defaultOn?: boolean
-}
-
-function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+function Toggle({
+  on,
+  onToggle,
+  disabled,
+}: {
+  on: boolean
+  onToggle: () => void
+  disabled?: boolean
+}) {
   return (
     <button
+      type="button"
       role="switch"
       aria-checked={on}
-      onClick={onToggle}
-      className={`relative h-6 w-10 rounded-full transition-colors ${on ? 'bg-secondary-500' : 'bg-neutral-200'}`}
+      aria-disabled={disabled || undefined}
+      disabled={disabled}
+      onClick={disabled ? undefined : onToggle}
+      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+        on ? 'bg-secondary-500' : 'bg-neutral-200'
+      } ${disabled ? 'cursor-not-allowed opacity-40' : ''}`}
     >
       <span
-        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-4' : 'translate-x-0.5'}`}
+        className={`pointer-events-none absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-[left] duration-200 ${
+          on ? 'left-[22px]' : 'left-0.5'
+        }`}
       />
     </button>
   )
@@ -68,15 +75,16 @@ function RowLink({ icon: Icon, label, subtitle, onClick, danger }: {
   )
 }
 
-function RowToggle({ icon: Icon, label, subtitle, on, onToggle }: {
+function RowToggle({ icon: Icon, label, subtitle, on, onToggle, disabled }: {
   icon: React.ElementType
   label: string
   subtitle?: string
   on: boolean
   onToggle: () => void
+  disabled?: boolean
 }) {
   return (
-    <div className="flex w-full items-center gap-3.5 rounded-[14px] bg-surface px-4 py-3.5">
+    <div className={`flex w-full items-center gap-3.5 rounded-[14px] bg-surface px-4 py-3.5 ${disabled ? 'opacity-70' : ''}`}>
       <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-neutral-100 text-neutral-600">
         <Icon size={18} />
       </div>
@@ -84,7 +92,7 @@ function RowToggle({ icon: Icon, label, subtitle, on, onToggle }: {
         <p className="text-[15px] font-medium text-ink">{label}</p>
         {subtitle && <p className="text-[12px] text-neutral-500 mt-0.5">{subtitle}</p>}
       </div>
-      <Toggle on={on} onToggle={onToggle} />
+      <Toggle on={on} onToggle={onToggle} disabled={disabled} />
     </div>
   )
 }
@@ -99,9 +107,15 @@ function SectionLabel({ children }: { children: string }) {
 
 export default function Settings({ onBack, onLogout }: { onBack: () => void; onLogout: () => void }) {
   const { profile, user } = useAuth()
-  const currentUser = profile
-    ? { name: profile.name, handle: displayHandle(profile.handle), avatar: profile.avatar }
-    : mockUser
+  const { profileDraft, updateProfile } = useSession()
+  const currentUser = {
+    name: profileDraft.name ?? profile?.name ?? mockUser.name,
+    handle: displayHandle(profileDraft.handle ?? profile?.handle ?? mockUser.handle),
+    avatar: profileDraft.avatar || profile?.avatar || mockUser.avatar,
+    location: profileDraft.location ?? profile?.location ?? 'São Paulo, SP',
+    phone: profileDraft.phone ?? '+55 11 99999-0000',
+    bio: profileDraft.bio ?? profile?.bio ?? 'Corredor amador e entusiasta de vida saudável. Acredito que movimento é remédio. 🏃‍♂️',
+  }
   const [section, setSection] = useState<Section>('main')
   const [toggles, setToggles] = useState<Record<string, boolean>>({
     pushNotif: true,
@@ -161,8 +175,6 @@ export default function Settings({ onBack, onLogout }: { onBack: () => void; onL
             <SectionLabel>Conta</SectionLabel>
             <div className="space-y-0.5 overflow-hidden rounded-[18px]">
               <RowLink icon={User} label="Editar perfil" subtitle="Nome, foto e bio" onClick={() => setSection('conta')} />
-              <RowLink icon={AtSign} label="Nome de usuário" subtitle={currentUser.handle} onClick={() => setSection('conta')} />
-              <RowLink icon={Globe} label="Idioma" subtitle="Português (BR)" onClick={() => setSection('conta')} />
             </div>
 
             <SectionLabel>Preferências</SectionLabel>
@@ -181,7 +193,6 @@ export default function Settings({ onBack, onLogout }: { onBack: () => void; onL
 
             <div className="mt-5 space-y-0.5 overflow-hidden rounded-[18px]">
               <RowLink icon={LogOut} label="Sair da conta" onClick={onLogout} danger />
-              <RowLink icon={Trash2} label="Excluir conta" danger />
             </div>
           </>
         )}
@@ -191,22 +202,53 @@ export default function Settings({ onBack, onLogout }: { onBack: () => void; onL
           <>
             <SectionLabel>Informações pessoais</SectionLabel>
             <div className="space-y-3">
-              {[
-                { label: 'Nome completo', value: currentUser.name },
-                { label: 'Nome de usuário', value: currentUser.handle },
-                { label: 'E-mail', value: user?.email ?? '—' },
-                { label: 'Telefone', value: '+55 11 99999-0000' },
-                { label: 'Localização', value: profile?.location || 'São Paulo, SP' },
-              ].map(({ label, value }) => (
-                <div key={label} className="rounded-[14px] bg-surface px-4 py-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.6px] text-neutral-400">{label}</p>
-                  <p className="mt-1 text-[15px] text-ink">{value}</p>
-                </div>
-              ))}
+              <label className="block rounded-[14px] bg-surface px-4 py-3">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.6px] text-neutral-400">Nome completo</span>
+                <input
+                  value={currentUser.name}
+                  onChange={(e) => updateProfile({ name: e.target.value })}
+                  className="mt-1 w-full bg-transparent text-[15px] text-ink outline-none"
+                />
+              </label>
+              <label className="block rounded-[14px] bg-surface px-4 py-3">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.6px] text-neutral-400">Nome de usuário</span>
+                <input
+                  value={currentUser.handle}
+                  onChange={(e) => updateProfile({ handle: e.target.value })}
+                  className="mt-1 w-full bg-transparent text-[15px] text-ink outline-none"
+                />
+              </label>
+              <div className="rounded-[14px] bg-surface px-4 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.6px] text-neutral-400">E-mail</p>
+                <p className="mt-1 text-[15px] text-ink">{user?.email ?? '—'}</p>
+              </div>
+              <label className="block rounded-[14px] bg-surface px-4 py-3">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.6px] text-neutral-400">Telefone</span>
+                <input
+                  value={currentUser.phone}
+                  onChange={(e) => updateProfile({ phone: e.target.value })}
+                  className="mt-1 w-full bg-transparent text-[15px] text-ink outline-none"
+                />
+              </label>
+              <label className="block rounded-[14px] bg-surface px-4 py-3">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.6px] text-neutral-400">Localização</span>
+                <input
+                  value={currentUser.location}
+                  onChange={(e) => updateProfile({ location: e.target.value })}
+                  className="mt-1 w-full bg-transparent text-[15px] text-ink outline-none"
+                />
+              </label>
+              <label className="block rounded-[14px] bg-surface px-4 py-3">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.6px] text-neutral-400">Bio</span>
+                <textarea
+                  value={currentUser.bio}
+                  onChange={(e) => updateProfile({ bio: e.target.value })}
+                  rows={3}
+                  className="mt-1 w-full resize-none bg-transparent text-[15px] leading-relaxed text-ink outline-none"
+                />
+              </label>
             </div>
-            <button className="mt-5 w-full rounded-[14px] bg-secondary-500 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-secondary-600">
-              Salvar alterações
-            </button>
+            <p className="mt-4 text-center text-[13px] text-neutral-500">Alterações ficam salvas nesta sessão.</p>
           </>
         )}
 
@@ -217,7 +259,7 @@ export default function Settings({ onBack, onLogout }: { onBack: () => void; onL
             <div className="space-y-0.5 overflow-hidden rounded-[18px]">
               <RowToggle icon={Bell} label="Notificações push" subtitle="Ativar todas" on={toggles.pushNotif} onToggle={() => toggle('pushNotif')} />
               <RowToggle icon={User} label="Novos seguidores" on={toggles.postNotif} onToggle={() => toggle('postNotif')} />
-              <RowToggle icon={Globe} label="Atividade nos grupos" on={toggles.groupNotif} onToggle={() => toggle('groupNotif')} />
+              <RowToggle icon={User} label="Atividade nos grupos" on={toggles.groupNotif} onToggle={() => toggle('groupNotif')} />
             </div>
             <SectionLabel>E-mail</SectionLabel>
             <div className="space-y-0.5 overflow-hidden rounded-[18px]">
@@ -233,7 +275,7 @@ export default function Settings({ onBack, onLogout }: { onBack: () => void; onL
             <div className="space-y-0.5 overflow-hidden rounded-[18px]">
               <RowToggle icon={Lock} label="Conta privada" subtitle="Apenas seguidores aprovados veem seu conteúdo" on={toggles.privateAccount} onToggle={() => toggle('privateAccount')} />
               <RowToggle icon={Eye} label="Status de atividade" subtitle="Mostrar quando você está online" on={toggles.showOnlineStatus} onToggle={() => toggle('showOnlineStatus')} />
-              <RowToggle icon={Globe} label="Mostrar localização" on={toggles.showLocation} onToggle={() => toggle('showLocation')} />
+              <RowToggle icon={Eye} label="Mostrar localização" on={toggles.showLocation} onToggle={() => toggle('showLocation')} />
             </div>
             <SectionLabel>Dados</SectionLabel>
             <div className="space-y-0.5 overflow-hidden rounded-[18px]">
@@ -247,18 +289,9 @@ export default function Settings({ onBack, onLogout }: { onBack: () => void; onL
         {section === 'aparencia' && (
           <>
             <SectionLabel>Tema</SectionLabel>
-            <div className="space-y-0.5 overflow-hidden rounded-[18px]">
-              <RowToggle icon={Moon} label="Modo escuro" subtitle="Em breve" on={toggles.darkMode} onToggle={() => toggle('darkMode')} />
-              <RowToggle icon={Smartphone} label="Reduzir animações" on={toggles.reduceMotion} onToggle={() => toggle('reduceMotion')} />
-            </div>
-            <SectionLabel>Tamanho do texto</SectionLabel>
-            <div className="rounded-[18px] bg-surface px-4 py-4">
-              <div className="flex items-center gap-4">
-                <span className="text-[12px] text-neutral-400">A</span>
-                <input type="range" min={1} max={5} defaultValue={3} className="flex-1 accent-secondary-500" />
-                <span className="text-[18px] font-semibold text-ink">A</span>
-              </div>
-              <p className="mt-2 text-center text-[14px] text-neutral-500">Tamanho padrão</p>
+            <div className="space-y-0.5 overflow-hidden rounded-[18px] opacity-60 pointer-events-none">
+              <RowToggle icon={Moon} label="Modo escuro" subtitle="Em breve" on={false} onToggle={() => {}} disabled />
+              <RowToggle icon={Smartphone} label="Reduzir animações" subtitle="Em breve" on={false} onToggle={() => {}} disabled />
             </div>
           </>
         )}

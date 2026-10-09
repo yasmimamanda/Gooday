@@ -10,15 +10,29 @@ import {
 import type { ChatMessage, Post, Story } from './media'
 import { useAuth } from './auth'
 
+export type ProfileDraft = {
+  name?: string
+  handle?: string
+  bio?: string
+  location?: string
+  avatar?: string
+  cover?: string
+  phone?: string
+}
+
 type SessionContextValue = {
   posts: Post[]
   stories: Story[]
   seenStoryKeys: Set<string>
+  likedPostKeys: Set<string>
   messagesByContact: Record<string, ChatMessage[]>
+  profileDraft: ProfileDraft
   addPost: (post: Post) => void
   addStory: (story: Story) => void
   markStorySeen: (key: string) => void
+  toggleLike: (key: string) => void
   addMessage: (contactId: string, message: ChatMessage) => void
+  updateProfile: (patch: ProfileDraft) => void
 }
 
 const SessionContext = createContext<SessionContextValue | null>(null)
@@ -32,13 +46,17 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [posts, setPosts] = useState<Post[]>([])
   const [stories, setStories] = useState<Story[]>([])
   const [seenKeys, setSeenKeys] = useState<string[]>([])
+  const [likedKeys, setLikedKeys] = useState<string[]>([])
   const [messagesByContact, setMessagesByContact] = useState<Record<string, ChatMessage[]>>({})
+  const [profileDraft, setProfileDraft] = useState<ProfileDraft>({})
 
   useEffect(() => {
     setPosts([])
     setStories([])
     setSeenKeys([])
+    setLikedKeys([])
     setMessagesByContact({})
+    setProfileDraft({})
   }, [user?.id])
 
   const addPost = useCallback((post: Post) => {
@@ -65,20 +83,46 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }))
   }, [])
 
+  const toggleLike = useCallback((key: string) => {
+    setLikedKeys((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]))
+  }, [])
+
+  const updateProfile = useCallback((patch: ProfileDraft) => {
+    setProfileDraft((prev) => ({ ...prev, ...patch }))
+  }, [])
+
   const seenStoryKeys = useMemo(() => new Set(seenKeys), [seenKeys])
+  const likedPostKeys = useMemo(() => new Set(likedKeys), [likedKeys])
 
   const value = useMemo(
     () => ({
       posts,
       stories,
       seenStoryKeys,
+      likedPostKeys,
       messagesByContact,
+      profileDraft,
       addPost,
       addStory,
       markStorySeen,
+      toggleLike,
       addMessage,
+      updateProfile,
     }),
-    [posts, stories, seenStoryKeys, messagesByContact, addPost, addStory, markStorySeen, addMessage],
+    [
+      posts,
+      stories,
+      seenStoryKeys,
+      likedPostKeys,
+      messagesByContact,
+      profileDraft,
+      addPost,
+      addStory,
+      markStorySeen,
+      toggleLike,
+      addMessage,
+      updateProfile,
+    ],
   )
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>

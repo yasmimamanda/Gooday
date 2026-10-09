@@ -22,7 +22,7 @@ import {
   ConnectIcon,
   FilterIcon,
 } from './icons'
-import { contacts, sortStories, storyKey } from '../lib/media'
+import { contacts, postKey, sortStories, storyKey } from '../lib/media'
 import type { Group, Post, Story } from '../lib/media'
 import { useSession } from '../lib/session'
 
@@ -35,13 +35,13 @@ import { useSession } from '../lib/session'
 function StoryViewer({
   stories,
   startIndex,
-  seenSet,
+  replay,
   onSee,
   onClose,
 }: {
   stories: Story[]
   startIndex: number
-  seenSet: Set<number>
+  replay: boolean
   onSee: (i: number) => void
   onClose: () => void
 }) {
@@ -77,7 +77,7 @@ function StoryViewer({
             <div key={i} className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/30">
               <div
                 className="h-full rounded-full bg-white transition-all duration-300"
-                style={{ width: seenSet.has(i) || i < current ? '100%' : i === current ? '50%' : '0%' }}
+                style={{ width: replay || i <= current ? '100%' : '0%' }}
               />
             </div>
           ))}
@@ -122,7 +122,7 @@ function StoryViewer({
 
 export function StoriesRow({ stories, onAddStory }: { stories: Story[]; onAddStory?: () => void }) {
   const { seenStoryKeys, markStorySeen } = useSession()
-  const [viewer, setViewer] = useState<{ list: Story[]; index: number; seen: Set<number> } | null>(null)
+  const [viewer, setViewer] = useState<{ list: Story[]; index: number; replay: boolean } | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const drag = useRef({ active: false, startX: 0, scrollX: 0, moved: false })
   const viewerListRef = useRef<Story[]>([])
@@ -170,26 +170,17 @@ export function StoriesRow({ stories, onAddStory }: { stories: Story[]; onAddSto
   const openStory = (i: number) => {
     if (drag.current.moved) return
     const list = ordered
-    const key = storyKey(list[i])
-    markStorySeen(key)
-    const seen = new Set<number>()
-    list.forEach((s, idx) => {
-      if (s.seen || storyKey(s) === key) seen.add(idx)
-    })
+    const alreadySeen = !!list[i].seen
+    markStorySeen(storyKey(list[i]))
     viewerListRef.current = list
-    setViewer({ list, index: i, seen })
+    setViewer({ list, index: i, replay: alreadySeen })
   }
 
   const markViewerSeen = useCallback(
     (i: number) => {
       const s = viewerListRef.current[i]
       if (s) markStorySeen(storyKey(s))
-      setViewer((prev) => {
-        if (!prev || prev.seen.has(i)) return prev
-        const next = new Set(prev.seen)
-        next.add(i)
-        return { ...prev, seen: next }
-      })
+      setViewer((prev) => (prev ? { ...prev, index: i } : prev))
     },
     [markStorySeen],
   )
@@ -250,7 +241,7 @@ export function StoriesRow({ stories, onAddStory }: { stories: Story[]; onAddSto
         <StoryViewer
           stories={viewer.list}
           startIndex={viewer.index}
-          seenSet={viewer.seen}
+          replay={viewer.replay}
           onSee={markViewerSeen}
           onClose={() => setViewer(null)}
         />
@@ -298,13 +289,30 @@ export function GroupCard({ group, onOpenGroup }: { group: Group; onOpenGroup?: 
 
 /* ------------------------------- Post ----------------------------------
    Feed card: flat surface, 20px radius, media at 16px. */
-export function PostCard({ post }: { post: Post }) {
+export function PostCard({ post, onOpenAuthor }: { post: Post; onOpenAuthor?: () => void }) {
+  const { likedPostKeys, toggleLike } = useSession()
+  const key = postKey(post)
+  const liked = likedPostKeys.has(key)
+
   return (
     <article className="overflow-hidden rounded-xl bg-surface p-4 sm:p-5">
       <header className="flex items-center gap-3">
-        <Avatar src={post.avatar} size={44} />
-        <div className="flex-1">
-          <p className="text-[15px] font-semibold text-ink">{post.author}</p>
+        <button
+          type="button"
+          onClick={onOpenAuthor}
+          className="rounded-full transition-opacity hover:opacity-80"
+          aria-label={`Ver perfil de ${post.author}`}
+        >
+          <Avatar src={post.avatar} size={44} />
+        </button>
+        <div className="flex-1 min-w-0">
+          <button
+            type="button"
+            onClick={onOpenAuthor}
+            className="text-[15px] font-semibold text-ink hover:underline"
+          >
+            {post.author}
+          </button>
           <p className="flex items-center gap-1.5 text-[13px] text-neutral-400">
             <InfinityMark className="h-2.5 w-4 text-neutral-400" />
             {post.time}
@@ -351,8 +359,16 @@ export function PostCard({ post }: { post: Post }) {
 
       <footer className="mt-4 flex items-center justify-between text-neutral-500">
         <div className="flex items-center gap-5">
-          <button className="flex items-center gap-1.5 text-[14px] transition-colors hover:text-accent-600">
-            <HeartIcon width={21} height={21} /> {post.likes}
+          <button
+            onClick={() => toggleLike(key)}
+            aria-pressed={liked}
+            aria-label={liked ? 'Remover curtida' : 'Curtir'}
+            className={`flex items-center gap-1.5 text-[14px] font-medium transition-colors ${
+              liked ? 'text-accent-500' : 'hover:text-accent-600'
+            }`}
+          >
+            <HeartIcon width={21} height={21} fill={liked ? 'currentColor' : 'none'} />
+            {liked ? post.likes + 1 : post.likes}
           </button>
           <button className="flex items-center gap-1.5 text-[14px] transition-colors hover:text-ink">
             <CommentIcon width={21} height={21} /> {post.comments}

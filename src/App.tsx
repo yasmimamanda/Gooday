@@ -83,7 +83,7 @@ export default function App() {
   if (screen === 'search')
     return (
       <>
-        <Home onNavigate={navigate} activeKey="search" onOpenGroup={(id) => openGroup(id, 'search')} />
+        <Home onNavigate={navigate} activeKey="search" onOpenGroup={(id) => openGroup(id, 'search')} onOpenProfile={(id) => openProfile(id, 'search')} />
         <Search
           onBack={() => setScreen('home')}
           onOpenProfile={(id) => openProfile(id, 'search')}
@@ -95,7 +95,7 @@ export default function App() {
   if (screen === 'profile')
     return (
       <>
-        <Home onNavigate={navigate} activeKey="home" onOpenGroup={(id) => openGroup(id, 'home')} />
+        <Home onNavigate={navigate} activeKey="home" onOpenGroup={(id) => openGroup(id, 'home')} onOpenProfile={(id) => openProfile(id, 'home')} />
         <Profile
           personId={profileId}
           onBack={() => setScreen(prevScreen)}
@@ -110,7 +110,7 @@ export default function App() {
   if (screen === 'myprofile')
     return (
       <>
-        <Home onNavigate={navigate} activeKey="profile" onOpenGroup={(id) => openGroup(id, 'home')} />
+        <Home onNavigate={navigate} activeKey="profile" onOpenGroup={(id) => openGroup(id, 'home')} onOpenProfile={(id) => openProfile(id, 'home')} />
         <MyProfile onBack={() => setScreen(prevScreen)} onSettings={() => setScreen('settings')} />
       </>
     )
@@ -118,7 +118,7 @@ export default function App() {
   if (screen === 'settings')
     return (
       <>
-        <Home onNavigate={navigate} activeKey="settings" onOpenGroup={(id) => openGroup(id, 'home')} />
+        <Home onNavigate={navigate} activeKey="settings" onOpenGroup={(id) => openGroup(id, 'home')} onOpenProfile={(id) => openProfile(id, 'home')} />
         <Settings
           onBack={() => setScreen('myprofile')}
           onLogout={async () => {
@@ -132,7 +132,7 @@ export default function App() {
   if (screen === 'group')
     return (
       <>
-        <Home onNavigate={navigate} activeKey="home" onOpenGroup={(id) => openGroup(id, 'home')} />
+        <Home onNavigate={navigate} activeKey="home" onOpenGroup={(id) => openGroup(id, 'home')} onOpenProfile={(id) => openProfile(id, 'home')} />
         <GroupProfile groupId={groupId} onBack={() => setScreen(prevScreen)} />
       </>
     )
@@ -140,7 +140,7 @@ export default function App() {
   if (screen === 'grupos')
     return (
       <>
-        <Home onNavigate={navigate} activeKey="grupos" onOpenGroup={(id) => openGroup(id, 'grupos')} />
+        <Home onNavigate={navigate} activeKey="grupos" onOpenGroup={(id) => openGroup(id, 'grupos')} onOpenProfile={(id) => openProfile(id, 'grupos')} />
         <Grupos onBack={() => setScreen('home')} onOpenGroup={(id) => openGroup(id, 'grupos')} />
       </>
     )
@@ -163,13 +163,13 @@ export default function App() {
   if (screen === 'create')
     return (
       <>
-        <Home onNavigate={navigate} activeKey="create" onOpenGroup={(id) => openGroup(id, 'home')} />
+        <Home onNavigate={navigate} activeKey="create" onOpenGroup={(id) => openGroup(id, 'home')} onOpenProfile={(id) => openProfile(id, 'home')} />
         <Create onClose={() => setScreen('home')} />
       </>
     )
 
   if (screen === 'home')
-    return <Home onNavigate={navigate} activeKey="home" onOpenGroup={(id) => openGroup(id, 'home')} />
+    return <Home onNavigate={navigate} activeKey="home" onOpenGroup={(id) => openGroup(id, 'home')} onOpenProfile={(id) => openProfile(id, 'home')} />
 
   return (
     <AuthScreen

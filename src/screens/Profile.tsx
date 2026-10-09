@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ChevronLeft } from 'lucide-react'
 import { MediaImg } from '../components/ui'
 
-const profileData: Record<string, {
+export const profileData: Record<string, {
   id: string
   name: string
   handle: string
@@ -119,6 +119,31 @@ const profileData: Record<string, {
     following: 290,
     posts: ['/assets/48d71.png', '/assets/40f99.png', '/assets/074f9.png', '/assets/8aa91.png', '/assets/89f86.png', '/assets/f71df.png'],
   },
+  pedro: {
+    id: 'pedro',
+    name: 'Pedro Run',
+    handle: '@pedro.run',
+    avatar: '/assets/4b35d.png',
+    cover: '/assets/40f99.png',
+    location: 'São Paulo, SP',
+    bio: 'Corredor. 10K, 21K e o que vier. Respeite sua mente e trate seu corpo bem.',
+    interests: ['Corrida', '10K', 'Vida saudável'],
+    followers: 2180,
+    following: 340,
+    posts: ['/assets/40f99.png', '/assets/48d71.png', '/assets/074f9.png'],
+  },
+}
+
+export function personIdFromAuthor(author?: string | null): string | null {
+  if (!author) return null
+  const raw = author.replace(/^@/, '').toLowerCase()
+  const compact = raw.replace(/[._\s-]/g, '')
+  for (const [id, p] of Object.entries(profileData)) {
+    const handle = p.handle.replace(/^@/, '').toLowerCase()
+    if (id === raw || handle === raw) return id
+    if (id.replace(/[._\s-]/g, '') === compact || handle.replace(/[._\s-]/g, '') === compact) return id
+  }
+  return null
 }
 
 export default function Profile({
@@ -186,8 +211,7 @@ export default function Profile({
             {profile.interests.map((interest) => (
               <span
                 key={interest}
-                className="rounded-full px-3.5 py-1 text-[13px] font-medium text-ink"
-                style={{ background: '#e7fe8e' }}
+                className="rounded-full bg-secondary-500 px-3.5 py-1 text-[13px] font-medium text-white"
               >
                 {interest}
               </span>
@@ -209,14 +233,14 @@ export default function Profile({
           ))}
         </div>
 
-        {/* Action buttons — Seguir = lime per reference, Mensagem = neutral surface */}
         <div className="mt-5 flex gap-3">
           <button
             onClick={handleFollow}
             className={`flex-1 rounded-[14px] py-3.5 text-[15px] font-semibold transition-colors ${
-              following ? 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200' : 'text-ink'
+              following
+                ? 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                : 'bg-secondary-500 text-white hover:bg-secondary-600'
             }`}
-            style={!following ? { background: '#d4f535' } : undefined}
           >
             {following ? 'Seguindo' : 'Seguir'}
           </button>

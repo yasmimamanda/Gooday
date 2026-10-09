@@ -233,8 +233,13 @@ export type Post = {
   likes: number
   comments: number
 }
+
+export function postKey(post: Post) {
+  return post.id ?? `${post.author}|${post.time}|${post.image}|${post.text.slice(0, 48)}`
+}
 export const posts: Post[] = [
   {
+    id: 'post-bruna-smoothie',
     author: '@bruna_carla',
     avatar: faces.bruna,
     time: '5 min',
@@ -250,6 +255,7 @@ export const posts: Post[] = [
     comments: 25,
   },
   {
+    id: 'post-pedro-10k',
     author: '@pedro.run',
     avatar: faces.joseph,
     time: '32 min',
