@@ -134,16 +134,26 @@ export const profileData: Record<string, {
   },
 }
 
+function normalizePersonKey(value?: string | null) {
+  return (value ?? '').replace(/^@/, '').toLowerCase()
+}
+
 export function personIdFromAuthor(author?: string | null): string | null {
   if (!author) return null
-  const raw = author.replace(/^@/, '').toLowerCase()
+  const raw = normalizePersonKey(author)
   const compact = raw.replace(/[._\s-]/g, '')
   for (const [id, p] of Object.entries(profileData)) {
-    const handle = p.handle.replace(/^@/, '').toLowerCase()
+    const handle = normalizePersonKey(p.handle)
     if (id === raw || handle === raw) return id
     if (id.replace(/[._\s-]/g, '') === compact || handle.replace(/[._\s-]/g, '') === compact) return id
   }
   return null
+}
+
+export function lookupProfile(personId: string) {
+  return profileData[personId] ?? Object.values(profileData).find((p) => {
+    return personIdFromAuthor(personId) === p.id || normalizePersonKey(p.handle) === normalizePersonKey(personId)
+  })
 }
 
 export default function Profile({

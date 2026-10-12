@@ -295,12 +295,23 @@ export async function fetchConversations(userId?: string): Promise<Conversation[
 
 export async function fetchChatMessages(contactUsername: string): Promise<ChatMessage[]> {
   const me = (await supabase.auth.getUser()).data.user?.id ?? MARCOS_ID
+  const raw = contactUsername.replace(/^@/, '')
 
-  const { data: other } = await supabase
+  const { data: byUsername } = await supabase
     .from('users')
     .select('id')
-    .eq('username', contactUsername)
+    .eq('username', raw)
     .maybeSingle()
+
+  let other = byUsername
+  if (!other) {
+    const { data: byHandle } = await supabase
+      .from('users')
+      .select('id')
+      .eq('handle', `@${raw}`)
+      .maybeSingle()
+    other = byHandle
+  }
 
   if (!other) return []
 

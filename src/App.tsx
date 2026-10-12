@@ -34,6 +34,7 @@ export default function App() {
   const [profileId, setProfileId] = useState<string>('renata')
   const [groupId, setGroupId] = useState<string>('corrida')
   const [prevScreen, setPrevScreen] = useState<Screen>('home')
+  const [chatReturnScreen, setChatReturnScreen] = useState<Screen>('messages')
 
   useEffect(() => {
     if (loading) return
@@ -123,6 +124,7 @@ export default function App() {
           onBack={() => setScreen(prevScreen)}
           onMessage={(id) => {
             setChatContactId(id)
+            setChatReturnScreen('profile')
             setScreen('chat')
           }}
         />
@@ -170,6 +172,7 @@ export default function App() {
         onBack={() => setScreen('home')}
         onSelectContact={(id) => {
           setChatContactId(id)
+          setChatReturnScreen('messages')
           setScreen('chat')
         }}
         onOpenProfile={(id) => openProfile(id, 'messages')}
@@ -177,7 +180,7 @@ export default function App() {
     )
 
   if (screen === 'chat')
-    return withMobileNav(<Chat contactId={chatContactId} onBack={() => setScreen('messages')} />)
+    return withMobileNav(<Chat contactId={chatContactId} onBack={() => setScreen(chatReturnScreen)} />)
 
   if (screen === 'create')
     return withMobileNav(

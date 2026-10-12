@@ -1,8 +1,29 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { contacts as mockContacts, chatHistory, type ChatMessage, type Contact } from '../lib/media'
 import { fetchChatMessages, fetchContacts } from '../lib/api'
 import { MediaImg } from '../components/ui'
 import { useSession } from '../lib/session'
+import { lookupProfile, personIdFromAuthor } from './Profile'
+
+function samePerson(candidate: { id: string; handle?: string }, contactId: string) {
+  const wanted = personIdFromAuthor(contactId) ?? contactId.replace(/^@/, '').toLowerCase()
+  const ids = [candidate.id, candidate.handle]
+    .filter(Boolean)
+    .map((value) => personIdFromAuthor(value) ?? value.replace(/^@/, '').toLowerCase())
+  return ids.includes(wanted)
+}
+
+function contactFromProfile(contactId: string): Contact | undefined {
+  const profile = lookupProfile(contactId)
+  if (!profile) return undefined
+  return {
+    id: profile.id,
+    name: profile.name,
+    handle: profile.handle,
+    avatar: profile.avatar,
+    online: false,
+  }
+}
 
 export default function Chat({
   contactId,
@@ -13,19 +34,36 @@ export default function Chat({
 }) {
   const { messagesByContact, addMessage } = useSession()
   const [contacts, setContacts] = useState<Contact[]>(mockContacts)
-  const contact = contacts.find((c) => c.id === contactId)
-  const initial = chatHistory[contactId] ?? []
+  const contact = useMemo(() => {
+    return (
+      contacts.find((c) => samePerson(c, contactId)) ??
+      contactFromProfile(contactId) ?? {
+        id: contactId,
+        name: contactId.replace(/^@/, ''),
+        handle: contactId.startsWith('@') ? contactId : `@${contactId}`,
+        avatar: '',
+        online: false,
+      }
+    )
+  }, [contacts, contactId])
+  const historyKey = personIdFromAuthor(contactId) ?? contactId
+  const initial = chatHistory[historyKey] ?? chatHistory[contactId] ?? []
 
   const [baseMessages, setBaseMessages] = useState<ChatMessage[]>(initial)
   const [draft, setDraft] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
-  const messages = [...baseMessages, ...(messagesByContact[contactId] ?? [])]
+  const messages = [
+    ...baseMessages,
+    ...(messagesByContact[contact.id] ?? []),
+    ...(contact.id === contactId ? [] : (messagesByContact[contactId] ?? [])),
+  ]
 
   useEffect(() => {
     let cancelled = false
+    const queryId = (lookupProfile(contactId)?.handle ?? contactId).replace(/^@/, '')
     ;(async () => {
       try {
-        const [c, msgs] = await Promise.all([fetchContacts(), fetchChatMessages(contactId)])
+        const [c, msgs] = await Promise.all([fetchContacts(), fetchChatMessages(queryId)])
         if (cancelled) return
         if (c.length) setContacts(c)
         if (msgs.length) setBaseMessages(msgs)
@@ -47,7 +85,7 @@ export default function Chat({
     if (!text) return
     const now = new Date()
     const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-    addMessage(contactId, { id: String(Date.now()), text, time, fromMe: true })
+    addMessage(contact.id, { id: String(Date.now()), text, time, fromMe: true })
     setDraft('')
   }
 
@@ -57,8 +95,6 @@ export default function Chat({
       sendMessage()
     }
   }
-
-  if (!contact) return null
 
   return (
     <div className="flex min-h-dvh flex-col bg-canvas">

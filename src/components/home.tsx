@@ -634,7 +634,7 @@ export function TopBar({ user, onNavigate, onNotifications }: { user: { avatar: 
 export function MobileHeader({ user, onNotifications, onNavigate }: { user: { avatar: string }; onNotifications?: () => void; onNavigate?: (key: string) => void }) {
   return (
     <header className="sticky top-0 z-40 flex w-full items-center justify-between bg-surface px-4 py-3 border-b border-neutral-200 min-[800px]:hidden">
-      <InfinityMark className="h-6 w-12 text-ink" />
+      <img src="/favicon.png" alt="Gooday" className="h-7 w-auto select-none" />
       <div className="flex items-center gap-1">
         <IconButton aria-label="Notificações" onClick={onNotifications}>
           <BellIcon width={22} height={22} />
