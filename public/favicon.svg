@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Gooday">
+  <style>
+    .mark {
+      fill: none;
+      stroke: #111111;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @media (prefers-color-scheme: dark) {
+      .mark { stroke: #f3f3f3; }
+    }
+  </style>
+  <path class="mark" d="M6 16c0-4 3.2-6.5 6.6-6.5 2.8 0 4.4 1.9 6.4 6.5 2 4.6 3.6 6.5 6.4 6.5 3.4 0 6.6-2.5 6.6-6.5s-3.2-6.5-6.6-6.5c-2.8 0-4.4 1.9-6.4 6.5-2 4.6-3.6 6.5-6.4 6.5C9.2 22.5 6 20 6 16z"/>
+</svg>
